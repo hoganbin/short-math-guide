@@ -1,0 +1,2210 @@
+% This is file `short-math-guide.tex'.
+%
+% Copyright 1995-2017
+% American Mathematical Society
+% 
+% American Mathematical Society
+% Technical Support
+% Publications Technical Group
+% 201 Charles Street
+% Providence, RI 02904
+% USA
+% tel: (401) 455-4080
+%      (800) 321-4267 (USA and Canada only)
+% fax: (401) 331-3842
+% email: tech-support@ams.org
+% 
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either
+% version 1.3c of this license or (at your option) any
+% later version.  The latest version of this license is in
+%    http://www.latex-project.org/lppl.txt
+% and version 1.3c or later is part of all distributions of LaTeX 
+% version 2005/12/01 or later.
+% 
+% This file has the LPPL maintenance status "maintained".
+% 
+% The Current Maintainer of this work is the American Mathematical
+% Society.
+% 
+% Note: When updating, don't forget to update \smgversion, below
+
+\begin{filecontents}{mathdoc.sty}
+\NeedsTeXFormat{LaTeX2e}[1995/12/01]
+\ProvidesPackage{mathdoc}[2017/12/22 v2.0]
+
+\providecommand{\lat}[1]{\protect\LaTeX{}}
+\providecommand{\mdash}{\textemdash}
+\providecommand{\ndash}{\textendash}
+\newcommand{\ntt}{\fontseries{m}\fontshape{n}\ttfamily}
+\newcommand{\mntt}[1]{\mbox{\ntt #1}}
+\providecommand{\pkg}[1]{\mntt{#1}}
+\providecommand{\cls}[1]{\mntt{#1}}
+\providecommand{\opt}[1]{\mntt{#1}}
+\providecommand{\fn}[1]{\mntt{#1}}
+\providecommand{\env}[1]{\mntt{#1}}
+\chardef\bslash=`\\
+\let\charhack=\char
+\providecommand{\cn}[1]{\mntt{\bslash\charhack`#1}}
+\newcommand{\hycn}{\protect\cn}
+\@ifpackageloaded{hyperref}{%
+  \def\mntt#1{\texttt{\upshape #1}}%
+  \def\hycn#1{\texttt{\upshape\protect\bslash#1}}%
+  \begingroup \lccode`\.=`\\ \lowercase{\endgroup
+  \def\bslash{\texorpdfstring{.}{\textbackslash}}
+  }
+}{}
+\providecommand{\ncn}{\cn}
+\providecommand{\qq}[1]{\textquotedblleft#1\textquotedblright}
+
+\oddsidemargin=0pt \evensidemargin=0pt
+
+\let\Huge\Large \let\huge\Large \let\LARGE\large \let\Large\large
+
+\def\section{\@startsection{section}{1}%
+  \z@{9pt plus12pt}{1.5ex}%
+  {\bfseries\global\@afterindentfalse}}
+
+\def\subsection{\@startsection{subsection}{2}%
+  \z@{9pt plus12pt}{-.5em}%
+  {\scshape}}
+
+\def\@seccntformat#1{\csname the#1\endcsname.\enskip}
+
+%    Durn it, looks like a LaTeX kernel bug: consecutive "run-in" section
+%    titles should not allow a page break between them.
+\def\@startsection #1#2#3#4#5#6{%
+  \if@noskipsec \leavevmode\par\nobreak\vskip\medskipamount\@nobreaktrue\fi
+  \par
+  \@tempskipa#4\relax \@afterindenttrue
+  \ifdim\@tempskipa<\z@ \@tempskipa-\@tempskipa \@afterindentfalse \fi
+  \if@nobreak \everypar{}%
+  \else \addpenalty\@secpenalty \addvspace\@tempskipa
+  \fi
+  \@ifstar{\@ssect{#3}{#4}{#5}{#6}}%
+          {\@dblarg{\@sect{#1}{#2}{#3}{#4}{#5}{#6}}}%
+}
+
+%    Redefine \@sect to add period after run-in headings
+\def\@sect#1#2#3#4#5#6[#7]#8{%
+  \ifnum #2>\c@secnumdepth
+    \let\@svsec\@empty
+  \else
+    \refstepcounter{#1}%
+    \protected@edef\@svsec{\@seccntformat{#1}\relax}%
+  \fi
+  \@tempskipa #5\relax
+  \ifdim \@tempskipa>\z@
+    \begingroup
+      #6{%
+        \@hangfrom{\hskip #3\relax\@svsec}%
+          \interlinepenalty \@M #8\@@par}%
+    \endgroup
+    \csname #1mark\endcsname{#7}%
+    \addcontentsline{toc}{#1}{%
+      \ifnum #2>\c@secnumdepth \else
+        \protect\numberline{\csname the#1\endcsname}%
+      \fi
+      #7}%
+  \else
+    \def\@svsechd{%
+      #6{\hskip #3\relax
+      \@svsec #8\@addpunct.}%
+      \csname #1mark\endcsname{#7}%
+      \addcontentsline{toc}{#1}{%
+        \ifnum #2>\c@secnumdepth \else
+          \protect\numberline{\csname the#1\endcsname}%
+        \fi
+        #7}}%
+  \fi
+  \@xsect{#5}}
+%    From amsart, allows \nopunct to omit unwanted periods
+\def\@addpunct#1{%
+  \relax\ifhmode
+    \ifnum\spacefactor>\@m \else#1\fi
+  \fi}
+\def\nopunct{\texorpdfstring{\spacefactor 1007 }{}}
+
+%    Workaround to avoid overprinting problem with first contents entry
+\let\zz@l@section\l@section
+\def\l@section{\if@noskipsec \mbox{}\par\fi\zz@l@section}
+
+\RequirePackage{keyval}\relax
+
+\define@key{symlist}{adjustwidth}{\advance\wdadjust#1\relax}
+\define@key{symlist}{adjustheight}{\htadjust#1\relax}
+\define@key{symlist}{adjustcols}{\coladjust#1\relax}
+
+\providecommand{\newcolumn}{\vfil\break}
+
+\newenvironment{symlist}[1][]{%
+  \if@noskipsec\ifvmode\nobreak\fi\leavevmode\fi
+  \par
+  \nobreak
+  \wdadjust=1.5em\relax
+  \gdef\containsMSABM{TF}%
+  \setkeys{symlist}{#1}%
+    \setbox\z@\vbox\bgroup
+      \advance\baselineskip \z@ plus2pt\relax
+      % work around splittopskip discrepancy
+      \null \penalty-\@M
+}{%
+  \par\egroup
+  \splitlist
+}
+
+\let\debugit\relax
+\def\boxo{%
+  \typeout{Box0: \the\wd0x\the\ht0+\the\dp0, splitting to
+    \the\dimen@\space for \number\cols\space columns}%
+}
+
+\newdimen\shiftlistright
+\shiftlistright=20pt
+\def\splitlist{%
+  \begingroup
+  \textwidth=400pt % fudgit
+  \dimen@=\wd0 \advance\dimen@\wdadjust \advance\dimen@\colsep
+  \cols\textwidth \advance\cols\colsep
+  \divide\cols\dimen@ \advance\cols\coladjust
+  \ifnum\cols<\z@ \cols=\@ne \fi
+  \dimen@\ht0 \divide\dimen@\cols
+  \advance\dimen@\baselineskip \divide\dimen@\baselineskip
+  \multiply\dimen@\baselineskip
+  \splittopskip10pt\relax \splitmaxdepth\maxdepth
+  \advance\dimen@\splittopskip \advance\dimen@-\baselineskip
+  \advance\dimen@\htadjust
+  \vbadness\@M % ignore underfull vbox messages
+\debugit
+  \def\do{%
+    \advance\curcol 1
+    \setbox2=\vsplit0 to\dimen@
+    \ifnum\curcol=\cols \vtop \else \vtop to\dimen@\fi
+      {\unvbox 2 }\hskip\colsep
+    \ifdim\ht0>\z@ \expandafter\do\fi
+  }%
+  \setbox2=\vsplit0 to\baselineskip % discard empty top box
+  \hbox to\textwidth{\hskip\shiftlistright\quad\curcol=0 \do\unskip\hfil}%
+  % cancel a large prevdepth
+  \nobreak\nointerlineskip\hbox{}%
+  \endgroup
+  \global\shiftlistright20pt
+}
+
+\def\dosymbol#1{\csname do#1\endcsname}
+\newcommand{\ttfont}{%
+  \normalfont\ttfamily
+  \global\expandafter\let\expandafter\ttfont\the\font
+}
+
+\newdimen\wdadjust \newdimen\htadjust
+\newskip\colsep \newcount\cols \newcount\curcol \newcount\coladjust
+\colsep=10pt plus1fil minus2pt
+
+\newbox\symstrut
+\AtBeginDocument{\setbox\symstrut\hbox{\vrule height8.5pt depth3.5pt width0pt}}
+
+\newcommand{\symbox}[2]{%
+  \hbox{\llap{\unhcopy\symstrut $ #1 $ }\ttfont#2}%
+}
+
+\edef\symnote#1{%
+  \noexpand\expandafter\noexpand\symnoteA
+  \noexpand\meaning#1\relax\string h?"00\noexpand\@nil
+}
+
+\begingroup\edef\x#1h{\endgroup #1\string h}\x
+\def\symnoteA#1h#2#3"#4#5#6\@nil{%
+  \if c#2\relax
+    \expandafter\ifx\csname#2#3\endcsname\char
+      \ifcase#5\relax \or\or\or\or
+        \symnoteB[to 0pt]{a}\or\symnoteB[to 0pt]{b}\else\fi
+    \fi
+  \fi
+}
+
+\newcommand{\symnoteB}[2][]{%
+  \hbox #1{%
+    \raise0.9ex\hbox{\fontfamily{cmr}\fontseries{m}\scriptsize#2}\hss
+  }%
+  \gdef\containsMSABM{TT}%
+}
+
+
+\newcommand{\printSymbol}[1]{%
+  \hbox{\llap{\unhcopy\symstrut $#1$ }\ttfont\string#1%
+    \symnote#1%
+  }%
+}
+
+\newcommand{\printBig}[1]{\hbox{\llap{$\Big#1$ }\ttfont\string#1}}
+
+% Arg 2 is something like "kernel" or "amssymb"; but
+% if we want to distinguish msam or msbm we have to look more closely.
+
+\newcommand{\doVar}[2]{\expandafter\printSymbol\csname#1\endcsname}
+
+\newcommand{\doVarc}[2]{%
+  \hbox{\llap{\unhcopy\symstrut$#1$ }\ttfont#1}%
+}
+
+\newcommand{\doDeL}[2]{\expandafter\printBig\csname#1\endcsname}%
+
+\newcommand{\doDeLc}[2]{%
+  \hbox{\llap{$\Big#1$ }\ttfont#1}%
+}
+
+\let\doOrd\doVar
+\let\doBin\doVar
+\let\doRel\doVar
+\let\doPun\doVar
+\let\doOrdc\doVarc
+\let\doBinc\doVarc
+\let\doRelc\doVarc
+\let\doPunc\doVarc
+\let\doInn\doVar
+\let\doCOi\doVar
+\let\doCOs\doVar
+\let\doDeR\doDeL
+\let\doDeB\doDeL
+\let\doDeBc\doDeLc
+\let\doDeA\doDeL
+
+\newcommand{\doDeLR}[3]{%
+  \hbox{\llap{$
+    \expandafter\Bigl\csname#1\endcsname\,
+    \expandafter\Bigr\csname#2\endcsname$ }%
+    \ttfont\bslash#1 \bslash#2}%
+}
+
+\newcommand{\doDeLRc}[3]{%
+  \hbox{\llap{$\Bigl#1\,\Bigr#2$ }\ttfont\string#1 \string#2}%
+}
+
+\newcommand{\doOrdx}[2]{%
+  \hbox{\llap{\unhcopy\symstrut$#1$ }\ttfont\string#1}%
+}
+
+\let\doOpn\doVar
+
+\newcommand{\doFsw}[2]{%
+  \hbox{\kern-\parindent $\csname#1\endcsname{R}$\space
+    \ttfont\string#1\string{R\string}}%
+}
+
+\newcommand{\doAcc}[2]{%
+  \hbox{\llap{\unhcopy\symstrut$\csname#1\endcsname{x}$ }%
+    \ttfont\bslash#1\string{x\string}}%
+}
+
+\newcommand{\doAccw}[2]{%
+  \hbox{\llap{\unhcopy\symstrut$\csname#1\endcsname{xxx}$ }%
+    \ttfont\bslash#1\string{xxx\string}}%
+}
+
+\newcommand{\alias}[1]{$\csname#1\endcsname$ \cn{#1}}
+
+\newcommand{\symrow}[1]{%
+  {#1}& \mathbf{#1}& \mathrm{#1}& \mathsf{#1}& \mathit{#1}& \mathcal{#1}&
+  \mathbb{#1}& \mathfrak{#1}%
+}
+%  \mathscr{#1}&  \mathbb{#1}& \mathfrak{#1}%
+%% rsfs has nothing in some of the example slots, gets ! Missing character
+
+\newenvironment{eqxample}{%
+  \par\addvspace\medskipamount
+  \noindent\begin{minipage}{.5\columnwidth}%
+  \def\producing{\end{minipage}\begin{minipage}{.5\columnwidth}%
+    \hbox\bgroup\kern-.2pt\vrule width.2pt\vbox\bgroup\parindent0pt\relax
+%    The 3pt is to cancel the -\lineskip from \displ@y
+    \abovedisplayskip3pt \abovedisplayshortskip\abovedisplayskip
+    \belowdisplayskip0pt \belowdisplayshortskip\belowdisplayskip
+    \noindent}
+}{%
+  \par
+%    Ensure that a lonely \[\] structure doesn't take up width less than
+%    \hsize.
+  \hrule height0pt width\hsize
+  \egroup\vrule width.2pt\kern-.2pt\egroup
+  \end{minipage}%
+  \par\addvspace\medskipamount
+}
+
+\newcommand{\noteslabel}[1]{\hskip\labelsep\textit{#1\unskip}}
+
+\newcommand{\singlenote}{\item[\textit{Note.}]}
+\newcommand{\synonyms}{\item[\textit{Synonyms\/}:]}
+
+\newenvironment{notes}{%
+  \begin{list}{Note \arabic{enumiv}.}{%
+    \usecounter{enumiv}%
+    \footnotesize
+    \setlength{\leftmargin}{0pt}%
+    \setlength{\labelwidth}{0pt}%
+    \setlength{\topsep}{\medskipamount}%
+    \renewcommand{\makelabel}{\noteslabel}%
+  }%
+  \if\containsMSABM %
+    \item Labels \symnoteB[to 1.3em]{a,b} indicate \pkg{amssymb}
+      package, font \fn{msam} or~\fn{msbm}.%
+  \fi
+  \gdef\containsMSABM{TF}%
+}{%
+  \end{list}%
+}
+
+\newcommand{\ma}[1]{%
+  \string{{\normalfont\itshape #1}\string}\penalty9999 \ignorespaces}
+
+\newenvironment{cmdspec}[1][\linewidth]{%
+  \begin{center}\begin{minipage}{#1}%
+  \raggedright \normalfont\ttfamily \exhyphenpenalty10000
+}{%
+  \end{minipage}\end{center}%
+}
+
+%    l2h has this screwed up somehow? [mjd,1999/11/05]
+\newenvironment{tex2html_preform}{}{}
+
+\providecommand{\strong}{\textbf}
+
+\@ifundefined{ht@url}{
+  \newcommand\htlink{\href}
+  \newenvironment{makeimage}{}{}
+}{
+  \renewcommand\htlink[2]{#1\htlinkfootnote{\ht@url{#2}}}
+  \newcommand{\htlinkfootnote}[1]{}
+}
+
+\providecommand{\url}{\texttt}
+\endinput
+\end{filecontents}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\errorcontextlines=99
+
+\documentclass{article}
+\usepackage{mtpro2}
+
+\pagestyle{myheadings}
+%\usepackage{hthtml}
+\usepackage{amsmath}
+%\usepackage[cmex10]{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+%\usepackage[mathcal]{euscript}
+\usepackage{euscript}
+%\usepackage{mathtime}
+%\usepackage{stmaryrd}
+\usepackage{ctex}
+\numberwithin{equation}{section}
+
+%% at the moment, using either url or hyperref crashes
+%% get the content correct before debugging that problem
+%\usepackage{url}
+\let\url\texttt
+\usepackage[breaklinks,colorlinks]{hyperref}
+\usepackage{xcolor}
+\definecolor{hycitecolor}{rgb}{0,0.65,0}
+
+\usepackage{mathdoc}
+
+\hoffset=-1 true in
+\voffset=-1 true in
+\topmargin=0.75 true in %% \oddsidemargin\topmargin
+%\textwidth=210 true mm % A4
+\textwidth=139 true mm
+\textheight=11 true in \advance\textheight-2\topmargin
+\headheight=7pt \advance\textheight-\headheight
+\headsep=11pt \advance\textheight-\headsep
+
+\oddsidemargin=\paperwidth
+\advance\oddsidemargin-\textwidth
+\oddsidemargin=.5\oddsidemargin
+\evensidemargin=\oddsidemargin
+
+\hfuzz=14pt % suppress uninteresting warnings
+
+\providecommand{\abs}[1]{\lvert#1\rvert}
+
+\newcommand{\colhead}[1]{%
+  \textbf{\begin{tabular}[b]{@{}l@{}}#1\end{tabular}}%
+}
+
+\newcommand{\secref}[1]{Section~\ref{#1}}
+\newcommand{\tabref}[1]{Table~\ref{#1}}
+
+\newcommand{\begend}[1]{%
+  \cn{begin}\texttt{\symbol{123}#1\symbol{125}}%
+  \ \dots\ \cn{end}\texttt{\symbol{123}#1\symbol{125}}%
+}
+
+\newcommand{\dbldollars}{\texttt{\$\$} \dots\ \texttt{\$\$}}
+
+\newenvironment{lstack}[1][t]{%
+  \begin{tabular}[#1]{@{}l@{}}%
+}{%
+  \end{tabular}
+}  
+
+\newenvironment{cstack}[1][t]{%
+  \begin{tabular}[#1]{@{}c@{}}%
+}{%
+  \end{tabular}
+}  
+
+\newenvironment{llstack}[1][t]{%
+  \begin{tabular}[#1]{@{}ll@{}}%
+}{%
+  \end{tabular}
+}  
+
+%%\newcommand{\lspx}{\mbox{\rule{5pt}{.6pt}\rule{.6pt}{6pt}}}
+%%\newcommand{\rspx}{\mbox{\rule[-1pt]{.6pt}{7pt}%
+%%  \rule[-1pt]{5pt}{.6pt}}}
+%%\newcommand{\lspx}{\mathord{\otimes}}
+%%\newcommand{\rspx}{\mathord{\odot}}
+\newcommand{\lspx}{3}
+\newcommand{\rspx}{4}
+\newcommand{\spx}[1]{$\lspx #1\rspx$}
+
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\esssup}{ess\,sup}
+
+\newcommand{\dotsref}{\leavevmode\unskip\space
+  (see Section~\ref{dots})}
+\newcommand{\vertref}{\leavevmode\unskip\space
+  (see Section~\ref{verts})}
+
+\providecommand{\pdfinfo}[1]{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\title{一份简短的\LaTeX 数学指南}
+\newcommand{\smgversion}{\textup{2.0 (2019/8/14)}}
+\markboth{一份简短的\LaTeX 数学指南, 版本 \protect\smgversion}
+         {一份简短的\LaTeX 数学指南, 版本 \protect\smgversion}
+\author{译者：八一}
+\date{American Mathematical Society}
+
+\pdfinfo{
+  /Title (一份简短的\LaTeX 数学指南)
+  /Author (Michael Downes, updated by Barbara Beeton)
+  /Subject (一份简短的\LaTeX 数学指南)
+  /Keywords (LaTeX,amsmath,amsfonts,amssymb,equation,math,formula)
+}
+
+\maketitle
+\begin{center}
+版本 \smgversion,目前可从以下链接获得\\
+ \mbox{\texttt{https://www.ams.org/tex/amslatex}}\\
+ \mbox{\texttt{http://mirrors.sjtug.sjtu.edu.cn/ctan/info/short-math-guide/}}
+\end{center}
+
+
+\setcounter{tocdepth}{3}
+\tableofcontents
+
+\vspace{\fill}
+\section*{致谢及未来工作计划}
+感谢所有提供建议、援助和鼓励的世卫组织。特别感谢David Carlisle修复了相关旧的宏，以及Jennifer Wright Sharp在AMS风格中应用了一致的编辑。
+
+\smallskip\noindent
+未来版本的计划包括添加索引。
+
+\smallskip\noindent
+关于错误的报告和改进建议应发送到\\[2pt]
+\hspace*{\fill}
+\href{mailto:tech-support@ams.org}{\texttt{tech-support@ams.org}}\,.
+\hspace{\fill}\null
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{背景}
+
+这是对\LaTeX{}和两个用于\textbf{数学公式书写}的扩展包推荐特性的简要总结，需要更深入细节的读者可以参考书目中列出的资源，特别是\cite{lamport}、\cite{amsldoc}和\cite{fntguide}。假设您对标准\LaTeX{}术语有一定的熟悉程度，如果你需要对命令、可选参数、环境、包等的含义进行刷新，请参见\cite{lamport}。
+
+如果您使用美国数学协会发布的\LaTeX{}和amssymb以及amsmath两个扩展包，那么这里描述的大多数特性都是可用的。因此此文档的源文件从
+\begin{verbatim}
+\documentclass{article}
+\usepackage{amssymb,amsmath}
+\end{verbatim}
+
+对于数学符号使用相对较少的文档，可能会遗漏amssymb包;在\secref{mathsymbols}中，需要amssymb的符号用\textsuperscript{a}或\textsuperscript{b} (font \fn{msam}或\fn{msbm})标记。 在 \secref{alpha-digit}中,包含了一些额外的字体;在那里标识了必要的包。
+
+在其他包中发现的许多值得注意的特性没有在这里介绍;请参见\secref{other-packages}。关于数学符号，请特别注意，这里给出的列表并不是全面的，而是为了说明用户通常会发现在他们的\lat/系统中已经存在的、无需安装任何其他字体或做其他设置工作就可以使用。
+
+
+如果您需要这里没有显示的符号，您可能想咨询 \emph{The Comprehensive \LaTeX{} Symbol List}~\cite{comprehensive}.
+%\[\url{http://www.ctan.org/tex-archive/info/symbols/comprehensive/}\]
+如果您的\lat/安装是基于\TeX\,Live，并包括文档，列表也可以通过输入\texttt{texdoc comprehensive}在系统提示。
+\begin{table}[!htbp]
+\caption[]{多线方程和方程组\\
+ \phantom{Table 1:} (竖线表示标称边缘).}
+\label{displays}
+\bigskip
+\begin{makeimage}
+\begin{minipage}{\textwidth}
+\begin{eqxample}
+\begin{verbatim}
+\begin{equation}\label{xx}
+\begin{split}
+a& =b+c-d\\
+ & \quad +e-f\\
+ & =g+h\\
+ & =i
+\end{split}
+\end{equation}
+\end{verbatim}
+\producing
+\begin{equation}\label{xx}
+\begin{split}
+a& =b+c-d\\
+ & \quad +e-f\\
+ & =g+h\\
+ & =i
+\end{split}
+\end{equation}
+\end{eqxample}
+
+\begin{eqxample}
+\begin{verbatim}
+\begin{multline}
+a+b+c+d+e+f\\
++i+j+k+l+m+n\\
++o+p+q+r+s
+\end{multline}
+\end{verbatim}
+\producing
+\begin{multline}
+a+b+c+d+e+f\\
++i+j+k+l+m+n\\
++o+p+q+r+s
+\end{multline}
+\end{eqxample}
+
+\begin{eqxample}
+\begin{verbatim}
+\begin{gather}
+a_1=b_1+c_1\\
+a_2=b_2+c_2-d_2+e_2
+\end{gather}
+\end{verbatim}
+\producing
+\begin{gather}
+a_1=b_1+c_1\\
+a_2=b_2+c_2-d_2+e_2
+\end{gather}
+\end{eqxample}
+
+\begin{eqxample}
+\begin{verbatim}
+\begin{align}
+a_1& =b_1+c_1\\
+a_2& =b_2+c_2-d_2+e_2
+\end{align}
+\end{verbatim}
+\producing
+\begin{align}
+a_1& =b_1+c_1\\
+a_2& =b_2+c_2-d_2+e_2
+\end{align}
+\end{eqxample}
+
+\begin{eqxample}
+\begin{verbatim}
+\begin{align}
+a_{11}& =b_{11}&
+  a_{12}& =b_{12}\\
+a_{21}& =b_{21}&
+  a_{22}& =b_{22}+c_{22}
+\end{align}
+\end{verbatim}
+\producing
+\begin{align}
+a_{11}& =b_{11}&
+  a_{12}& =b_{12}\\
+a_{21}& =b_{21}&
+  a_{22}& =b_{22}+c_{22}
+\end{align}
+\end{eqxample}
+
+\begin{eqxample}
+\begin{verbatim}
+\begin{alignat}{2}
+a_1& =b_1+c_1&      &+e_1-f_1\\
+a_2& =b_2+c_2&{}-d_2&+e_2
+\end{alignat}
+\end{verbatim}
+\producing
+\begin{alignat}{2}
+a_1& =b_1+c_1&      &+e_1-f_1\\
+a_2& =b_2+c_2&{}-d_2&+e_2
+\end{alignat}
+\end{eqxample}
+
+\begin{eqxample}
+\begin{verbatim}
+\begin{flalign}
+a_{11}& =b_{11}&
+  a_{12}& =b_{12}\\
+a_{21}& =b_{21}&
+  a_{22}& =b_{22}+c_{22}
+\end{flalign}
+\end{verbatim}
+\producing
+\begin{flalign}
+a_{11}& =b_{11}&
+  a_{12}& =b_{12}\\
+a_{21}& =b_{21}&
+  a_{22}& =b_{22}+c_{22}
+\end{flalign}
+\end{eqxample}
+\def\containsMSABM{TF}
+\begin{notes}
+\item  将\env{*}应用于任何主环境都会抑制等式编号的赋值。但是，\cn{tag}可以用来应用一个可见的标签，而\cn{eqref}可以用来引用这些手工标记的行。在从属环境中使用\env{*}或\cn{tag}是错误的。
+\item 这里的 \env{split} 环境是一种特殊的情况。它是一个从属环境，可作为\env{equation}环境的内容，也可以作为一个\qq{line}在多个等式结构(如\env{align}或\env{gather})中的内容。
+\item  主要环境\env{gather}、\env{align}和\env{alignat}具有从属的'' \env{-ed}''同(\env{-ed}、\env{aligned}和\env{aligned dat})，它们可以用作更复杂显示的组件，或者在行内数学环境下使用。这些``\env{-ed}''环境可以使用可选参数\verb+[t]+, \verb+[c]+ or~\verb+[b]+.垂直定位。
+\item The name \env{flalign} is meant as ``full length'', not
+  ``flush left'' as often mistakenly reported.  However, since a
+  display occupying the full width will often begin at the left
+  margin, this confusion is understandable.  The indent applied to
+  \env{flalign} from both margins is set with \cn{multlinegap}.
+\end{notes}
+\end{minipage}
+\end{makeimage}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{行内数学符号和行间等式}\label{first-step}
+
+\subsection{数学环境}
+
+在\LaTeX{}中输入和退出数学模式通常使用以下命令和环境完成.%
+\begin{center}
+\begin{tabular}{ccc}
+\colhead{行内公式}&& \colhead{行间等式}\\[3pt]
+\cline{1-1}\cline{3-3}\noalign{\medskip}
+\begin{cstack}
+  \verb'$' \dots\ \verb'$'\\
+  \verb'\(' \dots\ \verb'\)'
+\end{cstack}%
+&&
+\begin{llstack}
+\begin{lstack}\verb'\[...\]'\\[6pt]\end{lstack}&
+  unnumbered\\
+\begin{lstack}
+  \verb'\begin{equation*}'\\
+  \dots\\
+  \verb'\end{equation*}'\\[6pt]
+\end{lstack}&
+  unnumbered\\
+\begin{lstack}
+  \verb'\begin{equation}'\\
+  \dots\\
+  \verb'\end{equation}'
+\end{lstack}&
+  \begin{lstack}automatically\\numbered\end{lstack}
+\end{llstack}
+\end{tabular}
+\begin{notes}
+%  \singlenote
+\item  不要在文本和显示的等式之间留下空行。这允许在该位置进行分页，这是一种糟糕的样式。它还会导致文本与显示之间的间距不正确，一般情况下会比实际值大。如果需要在输入中插入一个可视的断点，请在开头插入一行只包含一个 \verb+%+ 的行。仅当要显示新段落时，才在显示文本和后续文本之间留出空行。
+\item 不要在输入(\verb+\[...\]+,\env{equation}, etc.)将多个显示结构分组。相反使用带有子结构(\env{split}、\env{aligned}等)的多行结构。
+\item 另一种环境 \begend{math} 与 \begend{displaymath} 在练习中很少需要.，强烈反对使用默认的\TeX{}符号 \dbldollars\ 来显示方程。
+  尽管在\LaTeX{}中并没有明确禁止它，但在\LaTeX{}书中并没有将它作为\LaTeX{}命令集的一部分进行记录，并且它干扰了各种特性的正确操作，比如\opt{fleqn}选项。
+\item 强烈反对\env{eqnarray}和\env{eqnarray*}引用\cite{lamport}中描述的环境是因为它们产生了不一致的等号间距，并且不会试图通过等式编号来防止方程组的重叠。
+\end{notes}
+\end{center}
+处理方程组和多行方程的环境显示在\tabref{displays}中。
+
+\subsection{自动编号和交叉引用}
+使用\env{equation}环境可以得到一个自动编号的等式;若要为交叉引用指定一个标签请使用\cn{label}命令:
+\begin{verbatim}
+\begin{equation}\label{reio}
+...
+\end{equation}
+\end{verbatim}
+要得到对自动编号方程的交叉引用，请使用\cn{eqref}命令:
+\begin{verbatim}
+... using equations~\eqref{ax1} and~\eqref{bz2}, we
+can derive ...
+\end{verbatim}
+上面的示例将生成如下内容
+\begin{quote}
+  using equations (3.2) and (3.5), we can derive
+\end{quote}
+换句话说，\verb'\eqref{ax1}' 相当于\verb'(\ref{ax1})',但是\cn{eqref}生成的圆括号总是直立的。
+
+给方程编号的形式是 \textit{m.n} (\textit{section-number.equation-number}),
+在你的导言区中使用\cn{numberwithin}命令: 
+\begin{verbatim}
+\numberwithin{equation}{section}
+\end{verbatim}
+
+有关自定义编号方法的详细信息，请参考\cite[\S 6.3,
+\S C.8.4]{lamport}.
+
+这\env{subequations}环境提供了一种使用从属编号方案对组中的方程编号的方便方法。例如假设当前的方程编号是方程，可写成
+\begin{verbatim}
+\begin{equation}\label{first}
+a=b+c
+\end{equation}
+some intervening text
+\begin{subequations}\label{grp}
+\begin{align}
+a&=b+c\label{second}\\
+d&=e+f+g\label{third}\\
+h&=i+j\label{fourth}
+\end{align}
+\end{subequations}
+\end{verbatim}
+可得到
+\begin{equation}\label{first}
+a=b+c
+\end{equation}
+some intervening text
+\begin{subequations}\label{grp}
+\begin{align}
+a&=b+c\label{second}\\
+d&=e+f+g\label{third}\\
+h&=i+j\label{fourth}
+\end{align}
+\end{subequations}
+
+在 \verb'\begin{subequations}' 之后添加 \cn{label} 命令，你可以得到对一级编号的引用;以上例子中的\verb'\eqref{grp}'将产生\eqref{grp}，而\verb'\eqref{second}' 将产生\eqref{second}。
+	
+这个例子见链接 \url{https://tex.stackexchange.com/questions/220001/} 显示上述示例的一个变式, 使得该编号是 (2.1), (2.1a),
+\dots, 而不是 (2.1), (2.2a), \dots. 这是通过使用\cn{tag}等长成分的交叉引用来实现的。
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\providecommand{\dotsref}{\leavevmode\unskip\ignorespaces}
+\providecommand{\vertref}{\leavevmode\unskip\ignorespaces}
+
+\section{数学符号和数学字体}\label{mathsymbols}
+\subsection{数学符号类}
+
+数学公式中的符号可分不同类别，这些类别如果用单词来表示公式中每个符号的词性，对于不同的符号类，传统上使用一定的间距和位置提示来增加公式的可读性。
+
+\begin{center}
+\begin{tabular}{clll}
+\colhead{分类}& \colhead{记忆符}& \colhead{描述\\(发音部分)}& \colhead{例子}\\\hline\noalign{\smallskip}
+0& Ord& simple/ordinary (\qq{noun})& $A\;0\;\Phi\;\infty$\\
+1& Op& prefix operator& $\sum\;\prod\;\int$\\
+2& Bin& binary operator (conjunction)& ${+}\;{\cup}\;{\wedge}$\\
+3& Rel& relation/comparison (verb)& ${=}\;{<}\;{\subset}$\\
+4& Open& left/opening delimiter& $(\;{[}\;{\lbrace}\;{\langle}$\\
+5& Close& right/closing delimiter& $)\;{]}\;{\rbrace}\;{\rangle}$\\
+6& Punct& postfix/punctuation& ${.}\;{,}\;{;}\;{!}$\\
+\end{tabular}
+\end{center}
+\begin{notes}
+\item 在\TeX{}中，类0和其他类7之间的区别只与字体选择问题有关，且无关紧要。
+\item class 2 (Bin)的符号，尤其是减号$-$，如果它们没有合适的左操作数\mdash，例如在数学公式的开头或在开始的分隔符之后，这样就会被\LaTeX{}自动打印为class~0(无空格)。
+\end{notes}
+
+一些符号的间距遵循传统而不是一般规则:虽然$/$(从语义上讲)是class~2的，但是我们在斜杠左右没有空格的情况下写入$k/2$，而不是$k\mathbin{/}2$。比较 \verb'p|q' $p\vert q$ (无空格) 与 \verb'p\mid q' $p\mid q$ (class-3空格)。
+
+在\emph{\LaTeXe{} 字体选择}\cite{fntguide}中讨论了定义新数学符号的正确方法。这里不可能给出有用的概要是因为首先需要理解字体规范的分支。但假设你知道有一种名为\fn{wncyr10}的西里尔字体可用，下面是一个简单的示例来演示如何定义\LaTeX{}命令来将该字体中的一个字母打印为数学符号:
+
+\begin{verbatim}
+% Declare that the combination of font attributes OT2/wncyr/m/n
+% should select the wncyr font.
+\DeclareFontShape{OT2}{wncyr}{m}{n}{<->wncyr10}{}
+% Declare that the symbolic math font name "cyr" should resolve to
+% OT2/wncyr/m/n.
+\DeclareSymbolFont{cyr}{OT2}{wncyr}{m}{n}
+% Declare that the command \Sh should print symbol 88 from the math font
+% "cyr", and that the symbol class is 0 (= alphabetic = Ord).
+\DeclareMathSymbol{\Sh}{\mathalpha}{cyr}{88}
+\end{verbatim}
+
+\subsection{符号的有意省略}
+下面的数学符号是在\LaTeX{}书\cite{lamport}中提到的。本讨论中有意省略是因为当\pkg{amssymb}包被加载时它们会被等价的符号所替代。无论何时如果你正在使用\pkg{amssymb}包，那么通过使用替代名你可能获得的唯一益处就不必要增加内容中所使用的字体数量。
+
+\begin{center}
+\def\jdo#1{\cn{#1} \ $\csname #1\endcsname$}
+\begin{tabular}{r@{\,, see \ }l}
+\cn{Box}&\jdo{square}\\
+\cn{Diamond}&\jdo{lozenge}\\
+\cn{leadsto}&\jdo{rightsquigarrow}\\
+\cn{Join}&\jdo{bowtie}\\
+\cn{lhd}&\jdo{vartriangleleft}\\
+\cn{unlhd}&\jdo{trianglelefteq}\\
+\cn{rhd}&\jdo{vartriangleright}\\
+\cn{unrhd}&\jdo{trianglerighteq}
+\end{tabular}
+\end{center}
+
+此外除了上表\lat/符号外，还有很多符号可供\lat/使用。这个列表并不全面，有关更全面的符号列表，包括非数学符号如音节字母或dingbats字体，请参见\emph{全面 \LaTeX{}符号列表}~\cite{comprehensive}。(完整字体表，按字体名称排序，包含在\TeX~Live: \texttt{texdoc rawtables}提供的文档中。这些表不包括符号名称) 符号信息的另一个来源是\pkg{unicode-math}包;详细看~\cite{uc-math}.。
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\newpage
+
+\subsection{字母和数字\nopunct}\label{alpha-digit}
+
+\subsubsection{拉丁字母和阿拉伯数字}
+
+拉丁字母是简单符号，属于类~0。在数学公式中它们的默认字体是斜体。
+
+\begin{center}
+\begin{tabular}{c}
+  $A\,B\,C\,D\,E\,F\,G\,H\,I\,J\,K\,L\,M%
+   \,N\,O\,P\,Q\,R\,S\,T\,U\,V\,W\,X\,Y\,Z$\\
+  $a\,b\,c\,d\,e\,f\,g\,h\,i\,j\,k\,l\,m%
+   \,n\,o\,p\,q\,r\,s\,t\,u\,v\,w\,x\,y\,z$
+\end{tabular}
+\end{center}
+当在数学字母中为$i$或$j$添加重音时，可以使用\cn{imath}和\cn{jmath}得到无点变体:
+
+\begin{symlist}
+\dosymbol{Var}{imath}{kernel}
+\dosymbol{Var}{jmath}{kernel}
+\symbox{\hat{\jmath}}{\string\hat\string{\string\jmath\string}}
+\end{symlist}
+
+阿拉伯数字 0\ndash 9 也属于类~0。它们的默认字体是直立/罗马字体。
+
+\[0\,1\,2\,3\,4\,5\,6\,7\,8\,9\]
+
+\subsubsection{希腊字母}
+如拉丁字母一样，希腊字母是简单的符号，属于类~0。出于模糊的历史原因，在数学公式中小写希腊字母的默认字体是斜体，而大写希腊字母的默认字体是直立/罗马字体。(然而在物理和化学等其他领域，排印的传统是有些不同。)在这个列表中没有出现的大写希腊字母与某些拉丁字母可得到相同的效果: A表示 Alpha, B表示Beta等等；在小写字母列表中没有omicron命令，因为它显示出来的效果与拉丁语 $o$ 是相同。实际上在数学公式中，带有拉丁字母的希腊字母很少使用以避免混淆。
+
+\begin{symlist}[adjustheight=12pt]
+\dosymbol{Var}{Gamma}{kernel}
+\dosymbol{Var}{Delta}{kernel}
+\dosymbol{Var}{Lambda}{kernel}
+\dosymbol{Var}{Phi}{kernel}
+\dosymbol{Var}{Pi}{kernel}
+\dosymbol{Var}{Psi}{kernel}
+\dosymbol{Var}{Sigma}{kernel}
+\dosymbol{Var}{Theta}{kernel}
+\dosymbol{Var}{Upsilon}{kernel}
+\dosymbol{Var}{Xi}{kernel}
+\dosymbol{Var}{Omega}{kernel}
+\newcolumn
+\dosymbol{Var}{alpha}{kernel}
+\dosymbol{Var}{beta}{kernel}
+\dosymbol{Var}{gamma}{kernel}
+\dosymbol{Var}{delta}{kernel}
+\dosymbol{Var}{epsilon}{kernel}
+\dosymbol{Var}{zeta}{kernel}
+\dosymbol{Var}{eta}{kernel}
+\dosymbol{Var}{theta}{kernel}
+\dosymbol{Var}{iota}{kernel}
+\dosymbol{Var}{kappa}{kernel}
+\dosymbol{Var}{lambda}{kernel}
+\dosymbol{Var}{mu}{kernel}
+\newcolumn
+\dosymbol{Var}{nu}{kernel}
+\dosymbol{Var}{xi}{kernel}
+%\dosymbol{Var}{omicron}{??}
+\dosymbol{Var}{pi}{kernel}
+\dosymbol{Var}{rho}{kernel}
+\dosymbol{Var}{sigma}{kernel}
+\dosymbol{Var}{tau}{kernel}
+\dosymbol{Var}{upsilon}{kernel}
+\dosymbol{Var}{phi}{kernel}
+\dosymbol{Var}{chi}{kernel}
+\dosymbol{Var}{psi}{kernel}
+\dosymbol{Var}{omega}{kernel}
+\newcolumn
+\dosymbol{Ord}{digamma}{amssymb}
+\dosymbol{Var}{varepsilon}{kernel}
+\dosymbol{Ord}{varkappa}{amssymb}
+\dosymbol{Var}{varphi}{kernel}
+\dosymbol{Var}{varpi}{kernel}
+\dosymbol{Var}{varrho}{kernel}
+\dosymbol{Var}{varsigma}{kernel}
+\dosymbol{Var}{vartheta}{kernel}
+\end{symlist}
+
+\subsubsection{其他 “基本” 字母符号}
+这些也是类~0。
+\begin{symlist}
+\dosymbol{Ord}{aleph}{kernel}
+\dosymbol{Ord}{beth}{amssymb}
+\dosymbol{Ord}{daleth}{amssymb}
+\dosymbol{Ord}{gimel}{amssymb}
+\dosymbol{Ord}{complement}{amssymb}
+\dosymbol{Ord}{ell}{kernel}
+\dosymbol{Ord}{eth}{amssymb}
+\dosymbol{Ord}{hbar}{amssymb}
+\dosymbol{Ord}{hslash}{amssymb}
+\dosymbol{Ord}{mho}{amssymb}
+\dosymbol{Ord}{partial}{kernel}
+\dosymbol{Ord}{wp}{kernel}
+\dosymbol{Ord}{circledS}{amssymb}
+\dosymbol{Ord}{Bbbk}{amssymb}
+\dosymbol{Ord}{Finv}{amssymb}
+\dosymbol{Ord}{Game}{amssymb}
+\dosymbol{Ord}{Im}{kernel}
+\dosymbol{Ord}{Re}{kernel}
+\vfil
+\end{symlist}
+\begin{notes}
+\end{notes}
+
+\subsubsection{数学字体切换}\label{mathfonts}
+
+在传统的\LaTeX{}设置中，并不是支持全面的数学字体切换所必需的所有字体都是通用的。下面是在使用标准的计算机现代字体集时，将各种字体转换应用于广泛的数学符号的结果。可以看到对所有字体切换作出正确反应的唯一符号是大写拉丁字母。事实上除了拉丁字母之外，几乎所有的数学符号都不受字体转换的影响;尽管小写的拉丁字母、大写的希腊字母和数字对某些字体切换做出了正确的反应，但它们对其他字体切换产生了奇怪的结果。(使用其他的数学字体集比如Lucida New math 可能会在一定程度上改善这种情况。)
+
+\[\renewcommand{\arraystretch}{1.3}
+\begin{array}{cccccccc}
+%\text{default}& \cn{mathbf}& \cn{mathsf}& \cn{mathit}& \cn{mathcal}&
+%  \cn{mathscr}&  \cn{mathbb}& \cn{mathfrak}\\
+\text{default}& \cn{mathbf}& \cn{mathrm}& \cn{mathsf}& \cn{mathit}&
+  \cn{mathcal}& \cn{mathbb}& \cn{mathfrak}\\
+\hline
+\symrow{X} \\
+\symrow{x} \\
+\symrow{0} \\
+\symrow{[\,]} \\
+\symrow{+} \\
+\symrow{-} \\
+\symrow{=} \\
+\symrow{\Xi} \\
+\symrow{\xi} \\
+\symrow{\infty} \\
+\symrow{\aleph} \\
+\symrow{\sum}\\
+\symrow{\amalg} \\
+\symrow{\Re} \\
+\end{array}\]
+
+一个常见的命令给数学符号加粗粗，对于那些\cn{mathbf}不适用的符号，可以使用\cn{boldsymbol}或\cn{pmb}命令。
+
+\begin{equation}
+A_\infty + \pi A_0
+\sim \mathbf{A}_{\boldsymbol{\infty}} \boldsymbol{+}
+  \boldsymbol{\pi} \mathbf{A}_{\boldsymbol{0}}
+\sim\pmb{A}_{\pmb{\infty}} \pmb{+}\pmb{\pi} \pmb{A}_{\pmb{0}}
+\end{equation}
+\begin{verbatim}
+A_\infty + \pi A_0
+\sim \mathbf{A}_{\boldsymbol{\infty}} \boldsymbol{+}
+  \boldsymbol{\pi} \mathbf{A}_{\boldsymbol{0}}
+\sim\pmb{A}_{\pmb{\infty}} \pmb{+}\pmb{\pi} \pmb{A}_{\pmb{0}}
+\end{verbatim}
+
+这个\cn{boldsymbol}命令是需要使用\pkg{bm}包获得的，它提供了比\pkg{amsmath}包更新、更强大的版本。通常不建议同时对多个符号应用\cn{boldsymbol};如果出现这种需求，更有可能意味着有另一种更好的方式来解决它。
+
+
+\subsubsection{黑板粗体字母 }
+(\fn{msbm}; 无小写)
+使用: \verb'\mathbb{R}'.  需要 \pkg{amsfonts}宏包.
+\[
+\mathbb{A}\,\mathbb{B}\,\mathbb{C}\,\mathbb{D}\,\mathbb{E}\,\mathbb{F}
+\,\mathbb{G}\,\mathbb{H}\,\mathbb{I}\,\mathbb{J}\,\mathbb{K}\,\mathbb{L}
+\,\mathbb{M}\,\mathbb{N}\,\mathbb{O}\,\mathbb{P}\,\mathbb{Q}\,\mathbb{R}
+\,\mathbb{S}\,\mathbb{T}\,\mathbb{U}\,\mathbb{V}\,\mathbb{W}\,\mathbb{X}
+\,\mathbb{Y}\,\mathbb{Z}
+\]
+此外:\qquad  \cn{Bbbk} 可以得到 \quad $\Bbbk$
+%\newpage
+
+\subsubsection{手写体字母}
+ (\fn{cmsy}; 无小写)  使用: \verb'\mathcal{M}'.
+\[
+\mathcal{A}\,\mathcal{B}\,\mathcal{C}\,\mathcal{D}\,\mathcal{E}
+\,\mathcal{F}\,\mathcal{G}\,\mathcal{H}\,\mathcal{I}\,\mathcal{J}
+\,\mathcal{K}\,\mathcal{L}\,\mathcal{M}\,\mathcal{N}\,\mathcal{O}
+\,\mathcal{P}\,\mathcal{Q}\,\mathcal{R}\,\mathcal{S}\,\mathcal{T}
+\,\mathcal{U}\,\mathcal{V}\,\mathcal{W}\,\mathcal{X}\,\mathcal{Y}
+\,\mathcal{Z}
+\]
+
+\subsubsection{花体字母}
+(\fn{rsfs}; 无小写) 使用: \verb'\usepackage{mathrsfs}' \verb'\mathscr{B}'.
+\[
+\mathscr{A}\,\mathscr{B}\,\mathscr{C}\,\mathscr{D}\,\mathscr{E}
+\,\mathscr{F}\,\mathscr{G}\,\mathscr{H}\,\mathscr{I}\,\mathscr{J}
+\,\mathscr{K}\,\mathscr{L}\,\mathscr{M}\,\mathscr{N}\,\mathscr{O}
+\,\mathscr{P}\,\mathscr{Q}\,\mathscr{R}\,\mathscr{S}\,\mathscr{T}
+\,\mathscr{U}\,\mathscr{V}\,\mathscr{W}\,\mathscr{X}\,\mathscr{Y}
+\,\mathscr{Z}
+\]
+
+\begingroup
+%\noindent
+(\fn{eusm}; 无小写) 使用: \verb'\usepackage{euscript}' \verb'\mathscr{E}'.
+\renewcommand{\mathscr}{\EuScript}
+\[
+\mathscr{A}\,\mathscr{B}\,\mathscr{C}\,\mathscr{D}\,\mathscr{E}
+\,\mathscr{F}\,\mathscr{G}\,\mathscr{H}\,\mathscr{I}\,\mathscr{J}
+\,\mathscr{K}\,\mathscr{L}\,\mathscr{M}\,\mathscr{N}\,\mathscr{O}
+\,\mathscr{P}\,\mathscr{Q}\,\mathscr{R}\,\mathscr{S}\,\mathscr{T}
+\,\mathscr{U}\,\mathscr{V}\,\mathscr{W}\,\mathscr{X}\,\mathscr{Y}
+\,\mathscr{Z}
+\]
+\endgroup
+
+\subsubsection{哥特体字母 (\fn{eufm})}
+使用: \verb'\mathfrak{S}'.  需要 \pkg{amsfonts}.
+\[
+\mathfrak{A}\,\mathfrak{B}\,\mathfrak{C}\,\mathfrak{D}\,\mathfrak{E}
+\,\mathfrak{F}\,\mathfrak{G}\,\mathfrak{H}\,\mathfrak{I}\,\mathfrak{J}
+\,\mathfrak{K}\,\mathfrak{L}\,\mathfrak{M}\,\mathfrak{N}\,\mathfrak{O}
+\,\mathfrak{P}\,\mathfrak{Q}\,\mathfrak{R}\,\mathfrak{S}\,\mathfrak{T}
+\,\mathfrak{U}\,\mathfrak{V}\,\mathfrak{W}\,\mathfrak{X}\,\mathfrak{Y}
+\,\mathfrak{Z}
+\]
+\[
+\mathfrak{a}\,\mathfrak{b}\,\mathfrak{c}\,\mathfrak{d}\,\mathfrak{e}
+\,\mathfrak{f}\,\mathfrak{g}\,\mathfrak{h}\,\mathfrak{i}\,\mathfrak{j}
+\,\mathfrak{k}\,\mathfrak{l}\,\mathfrak{m}\,\mathfrak{n}\,\mathfrak{o}
+\,\mathfrak{p}\,\mathfrak{q}\,\mathfrak{r}\,\mathfrak{s}\,\mathfrak{t}
+\,\mathfrak{u}\,\mathfrak{v}\,\mathfrak{w}\,\mathfrak{x}\,\mathfrak{y}
+\,\mathfrak{z}
+\]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{其他简单符号}
+这些符号也是类~0(普通)，这说明了它们没有任何内置的间距。
+\begin{symlist}
+\dosymbol{Ordx}{\#}{kernel}
+\dosymbol{Ordx}{\&}{kernel}
+\dosymbol{Ord}{angle}{amssymb}
+\dosymbol{Ord}{backprime}{amssymb}
+\dosymbol{Ord}{bigstar}{amssymb}
+\dosymbol{Ord}{blacklozenge}{amssymb}
+\dosymbol{Ord}{blacksquare}{amssymb}
+\dosymbol{Ord}{blacktriangle}{amssymb}
+\dosymbol{Ord}{blacktriangledown}{amssymb}
+\dosymbol{Ord}{bot}{kernel}
+\dosymbol{Ord}{clubsuit}{kernel}
+\dosymbol{Ord}{diagdown}{amssymb}
+\dosymbol{Ord}{diagup}{amssymb}
+\dosymbol{Ord}{diamondsuit}{kernel}
+\dosymbol{Ord}{emptyset}{kernel}
+\dosymbol{Ord}{exists}{kernel}
+\dosymbol{Ord}{flat}{kernel}
+\dosymbol{Ord}{forall}{kernel}
+\dosymbol{Ord}{heartsuit}{kernel}
+\dosymbol{Ord}{infty}{kernel}
+\dosymbol{Ord}{lozenge}{amssymb}
+\dosymbol{Ord}{measuredangle}{amssymb}
+\dosymbol{Ord}{nabla}{kernel}
+\dosymbol{Ord}{natural}{kernel}
+\dosymbol{Ord}{neg}{kernel}
+\dosymbol{Ord}{nexists}{amssymb}
+\dosymbol{Ord}{prime}{kernel}
+\dosymbol{Ord}{sharp}{kernel}
+\dosymbol{Ord}{spadesuit}{kernel}
+\dosymbol{Ord}{sphericalangle}{amssymb}
+\dosymbol{Ord}{square}{amssymb}
+\dosymbol{Ord}{surd}{kernel}
+\dosymbol{Ord}{top}{kernel}
+\dosymbol{Ord}{triangle}{kernel}
+\dosymbol{Ord}{triangledown}{amssymb}
+\dosymbol{Ord}{varnothing}{amssymb}
+\end{symlist}
+\begin{notes}
+\item A common mistake in the use of the symbols $\square$ and $\#$
+  is to try to make them serve as binary operators or relation symbols
+  without using a properly defined math symbol command. If you merely
+  use the existing commands \cn{square} or \cn{\#} the intersymbol
+  spacing will be incorrect because those commands produce a class-0
+  symbol.
+\item Synonyms: \alias{lnot}
+
+\end{notes}
+
+\subsection{运算符号\nopunct}
+\begin{symlist}
+\dosymbol{Binc}{*}{kernel}
+\dosymbol{Binc}{+}{kernel}
+\dosymbol{Binc}{-}{kernel}
+\dosymbol{Bin}{amalg}{kernel}
+\dosymbol{Bin}{ast}{kernel}
+\dosymbol{Bin}{barwedge}{amssymb}
+\dosymbol{Bin}{bigcirc}{kernel}
+\dosymbol{Bin}{bigtriangledown}{kernel}
+\dosymbol{Bin}{bigtriangleup}{kernel}
+\dosymbol{Bin}{boxdot}{amssymb}
+\dosymbol{Bin}{boxminus}{amssymb}
+\dosymbol{Bin}{boxplus}{amssymb}
+\dosymbol{Bin}{boxtimes}{amssymb}
+\dosymbol{Bin}{bullet}{kernel}
+\dosymbol{Bin}{cap}{kernel}
+\dosymbol{Bin}{Cap}{amssymb}
+\dosymbol{Bin}{cdot}{kernel}
+\dosymbol{Bin}{centerdot}{amssymb}
+\dosymbol{Bin}{circ}{kernel}
+\dosymbol{Bin}{circledast}{amssymb}
+\dosymbol{Bin}{circledcirc}{amssymb}
+\dosymbol{Bin}{circleddash}{amssymb}
+\dosymbol{Bin}{cup}{kernel}
+\dosymbol{Bin}{Cup}{amssymb}
+\dosymbol{Bin}{curlyvee}{amssymb}
+\dosymbol{Bin}{curlywedge}{amssymb}
+\dosymbol{Bin}{dagger}{kernel}
+\dosymbol{Bin}{ddagger}{kernel}
+\dosymbol{Bin}{diamond}{kernel}
+\dosymbol{Bin}{div}{kernel}
+\dosymbol{Bin}{divideontimes}{amssymb}
+\dosymbol{Bin}{dotplus}{amssymb}
+\dosymbol{Bin}{doublebarwedge}{amssymb}
+\dosymbol{Bin}{gtrdot}{amssymb}
+\dosymbol{Bin}{intercal}{amssymb}
+\dosymbol{Bin}{leftthreetimes}{amssymb}
+\dosymbol{Bin}{lessdot}{amssymb}
+\dosymbol{Bin}{ltimes}{amssymb}
+\dosymbol{Bin}{mp}{kernel}
+\dosymbol{Bin}{odot}{kernel}
+\dosymbol{Bin}{ominus}{kernel}
+\dosymbol{Bin}{oplus}{kernel}
+\dosymbol{Bin}{oslash}{kernel}
+\dosymbol{Bin}{otimes}{kernel}
+\dosymbol{Bin}{pm}{kernel}
+\dosymbol{Bin}{rightthreetimes}{amssymb}
+\dosymbol{Bin}{rtimes}{amssymb}
+\dosymbol{Bin}{setminus}{kernel}
+\dosymbol{Bin}{smallsetminus}{amssymb}
+\dosymbol{Bin}{sqcap}{kernel}
+\dosymbol{Bin}{sqcup}{kernel}
+\dosymbol{Bin}{star}{kernel}
+\dosymbol{Bin}{times}{kernel}
+\dosymbol{Bin}{triangleleft}{kernel}
+\dosymbol{Bin}{triangleright}{kernel}
+\dosymbol{Bin}{uplus}{kernel}
+\dosymbol{Bin}{vee}{kernel}
+\dosymbol{Bin}{veebar}{amssymb}
+\dosymbol{Bin}{wedge}{kernel}
+\dosymbol{Bin}{wr}{kernel}
+\end{symlist}
+\begin{notes}
+\synonyms \alias{land}, \alias{lor}, \alias{doublecup}, \alias{doublecap}
+\end{notes}
+
+\subsection{关系符号:
+    \texorpdfstring{$<$ $=$ $>$ $\succ$ $\sim$}{< + > succeed ~}
+    与变式\nopunct}
+\begin{symlist}[adjustheight=10pt]
+\dosymbol{Relc}{<}{kernel}
+\dosymbol{Relc}{=}{kernel}
+\dosymbol{Relc}{>}{kernel}
+\dosymbol{Rel}{approx}{kernel}
+\dosymbol{Rel}{approxeq}{amssymb}
+\dosymbol{Rel}{asymp}{kernel}
+\dosymbol{Rel}{backsim}{amssymb}
+\dosymbol{Rel}{backsimeq}{amssymb}
+\dosymbol{Rel}{bumpeq}{amssymb}
+\dosymbol{Rel}{Bumpeq}{amssymb}
+\dosymbol{Rel}{circeq}{amssymb}
+\dosymbol{Rel}{cong}{kernel}
+\dosymbol{Rel}{curlyeqprec}{amssymb}
+\dosymbol{Rel}{curlyeqsucc}{amssymb}
+\dosymbol{Rel}{doteq}{kernel}
+\dosymbol{Rel}{doteqdot}{amssymb}
+\dosymbol{Rel}{eqcirc}{amssymb}
+\dosymbol{Rel}{eqsim}{amssymb}
+\dosymbol{Rel}{eqslantgtr}{amssymb}
+\dosymbol{Rel}{eqslantless}{amssymb}
+\dosymbol{Rel}{equiv}{kernel}
+\dosymbol{Rel}{fallingdotseq}{amssymb}
+\dosymbol{Rel}{geq}{kernel}
+\dosymbol{Rel}{geqq}{amssymb}
+\dosymbol{Rel}{geqslant}{amssymb}
+\dosymbol{Rel}{gg}{kernel}
+\dosymbol{Rel}{ggg}{amssymb}
+\dosymbol{Rel}{gnapprox}{amssymb}
+\dosymbol{Rel}{gneq}{amssymb}
+\dosymbol{Rel}{gneqq}{amssymb}
+\dosymbol{Rel}{gnsim}{amssymb}
+\dosymbol{Rel}{gtrapprox}{amssymb}
+\dosymbol{Rel}{gtreqless}{amssymb}
+\dosymbol{Rel}{gtreqqless}{amssymb}
+\dosymbol{Rel}{gtrless}{amssymb}
+\dosymbol{Rel}{gtrsim}{amssymb}
+\dosymbol{Rel}{gvertneqq}{amssymb}
+\dosymbol{Rel}{leq}{kernel}
+\dosymbol{Rel}{leqq}{amssymb}
+\dosymbol{Rel}{leqslant}{amssymb}
+\dosymbol{Rel}{lessapprox}{amssymb}
+\dosymbol{Rel}{lesseqgtr}{amssymb}
+\dosymbol{Rel}{lesseqqgtr}{amssymb}
+\dosymbol{Rel}{lessgtr}{amssymb}
+\dosymbol{Rel}{lesssim}{amssymb}
+\dosymbol{Rel}{ll}{kernel}
+\dosymbol{Rel}{lll}{amssymb}
+\dosymbol{Rel}{lnapprox}{amssymb}
+\dosymbol{Rel}{lneq}{amssymb}
+\dosymbol{Rel}{lneqq}{amssymb}
+\dosymbol{Rel}{lnsim}{amssymb}
+\dosymbol{Rel}{lvertneqq}{amssymb}
+\dosymbol{Rel}{ncong}{amssymb}
+\dosymbol{Rel}{neq}{kernel}
+\dosymbol{Rel}{ngeq}{amssymb}
+\dosymbol{Rel}{ngeqq}{amssymb}
+\dosymbol{Rel}{ngeqslant}{amssymb}
+\dosymbol{Rel}{ngtr}{amssymb}
+\dosymbol{Rel}{nleq}{amssymb}
+\dosymbol{Rel}{nleqq}{amssymb}
+\dosymbol{Rel}{nleqslant}{amssymb}
+\dosymbol{Rel}{nless}{amssymb}
+\dosymbol{Rel}{nprec}{amssymb}
+\dosymbol{Rel}{npreceq}{amssymb}
+\dosymbol{Rel}{nsim}{amssymb}
+\dosymbol{Rel}{nsucc}{amssymb}
+\dosymbol{Rel}{nsucceq}{amssymb}
+\dosymbol{Rel}{prec}{kernel}
+\dosymbol{Rel}{precapprox}{amssymb}
+\dosymbol{Rel}{preccurlyeq}{amssymb}
+\dosymbol{Rel}{preceq}{kernel}
+\dosymbol{Rel}{precnapprox}{amssymb}
+\dosymbol{Rel}{precneqq}{amssymb}
+\dosymbol{Rel}{precnsim}{amssymb}
+\dosymbol{Rel}{precsim}{amssymb}
+\dosymbol{Rel}{risingdotseq}{amssymb}
+\dosymbol{Rel}{sim}{kernel}
+\dosymbol{Rel}{simeq}{kernel}
+\dosymbol{Rel}{succ}{kernel}
+\dosymbol{Rel}{succapprox}{amssymb}
+\dosymbol{Rel}{succcurlyeq}{amssymb}
+\dosymbol{Rel}{succeq}{kernel}
+\dosymbol{Rel}{succnapprox}{amssymb}
+\dosymbol{Rel}{succneqq}{amssymb}
+\dosymbol{Rel}{succnsim}{amssymb}
+\dosymbol{Rel}{succsim}{amssymb}
+\dosymbol{Rel}{thickapprox}{amssymb}
+\dosymbol{Rel}{thicksim}{amssymb}
+\dosymbol{Rel}{triangleq}{amssymb}
+\end{symlist}
+\begin{notes}
+  \synonyms \alias{ne}, \alias{le}, \alias{ge}, \alias{Doteq}, \alias{llless}, \alias{gggtr}
+\end{notes}
+
+\subsection{关系符号: 箭头}
+注意看 \secref{notations}.
+\begin{symlist}[adjustheight=10pt]
+\dosymbol{Rel}{circlearrowleft}{amssymb}
+\dosymbol{Rel}{circlearrowright}{amssymb}
+\dosymbol{Rel}{curvearrowleft}{amssymb}
+\dosymbol{Rel}{curvearrowright}{amssymb}
+\dosymbol{Rel}{downdownarrows}{amssymb}
+\dosymbol{Rel}{downharpoonleft}{amssymb}
+\dosymbol{Rel}{downharpoonright}{amssymb}
+\dosymbol{Rel}{hookleftarrow}{kernel}
+\dosymbol{Rel}{hookrightarrow}{kernel}
+\dosymbol{Rel}{leftarrow}{kernel}
+\dosymbol{Rel}{Leftarrow}{kernel}
+\dosymbol{Rel}{leftarrowtail}{amssymb}
+\dosymbol{Rel}{leftharpoondown}{kernel}
+\dosymbol{Rel}{leftharpoonup}{kernel}
+\dosymbol{Rel}{leftleftarrows}{amssymb}
+\dosymbol{Rel}{leftrightarrow}{kernel}
+\dosymbol{Rel}{Leftrightarrow}{kernel}
+\dosymbol{Rel}{leftrightarrows}{amssymb}
+\dosymbol{Rel}{leftrightharpoons}{amssymb}
+\dosymbol{Rel}{leftrightsquigarrow}{amssymb}
+\dosymbol{Rel}{Lleftarrow}{amssymb}
+\dosymbol{Rel}{longleftarrow}{kernel}
+\dosymbol{Rel}{Longleftarrow}{kernel}
+\dosymbol{Rel}{longleftrightarrow}{kernel}
+\dosymbol{Rel}{Longleftrightarrow}{kernel}
+\dosymbol{Rel}{longmapsto}{kernel}
+\dosymbol{Rel}{longrightarrow}{kernel}
+\dosymbol{Rel}{Longrightarrow}{kernel}
+\dosymbol{Rel}{looparrowleft}{amssymb}
+\dosymbol{Rel}{looparrowright}{amssymb}
+\dosymbol{Rel}{Lsh}{amssymb}
+\dosymbol{Rel}{mapsto}{kernel}
+\dosymbol{Rel}{multimap}{amssymb}
+\dosymbol{Rel}{nLeftarrow}{amssymb}
+\dosymbol{Rel}{nLeftrightarrow}{amssymb}
+\dosymbol{Rel}{nRightarrow}{amssymb}
+\dosymbol{Rel}{nearrow}{kernel}
+\dosymbol{Rel}{nleftarrow}{amssymb}
+\dosymbol{Rel}{nleftrightarrow}{amssymb}
+\dosymbol{Rel}{nrightarrow}{amssymb}
+\dosymbol{Rel}{nwarrow}{kernel}
+\dosymbol{Rel}{rightarrow}{kernel}
+\dosymbol{Rel}{Rightarrow}{kernel}
+\dosymbol{Rel}{rightarrowtail}{amssymb}
+\dosymbol{Rel}{rightharpoondown}{kernel}
+\dosymbol{Rel}{rightharpoonup}{kernel}
+\dosymbol{Rel}{rightleftarrows}{amssymb}
+\dosymbol{Rel}{rightleftharpoons}{amssymb}
+\dosymbol{Rel}{rightrightarrows}{amssymb}
+\dosymbol{Rel}{rightsquigarrow}{amssymb}
+\dosymbol{Rel}{Rrightarrow}{amssymb}
+\dosymbol{Rel}{Rsh}{amssymb}
+\dosymbol{Rel}{searrow}{kernel}
+\dosymbol{Rel}{swarrow}{kernel}
+\dosymbol{Rel}{twoheadleftarrow}{amssymb}
+\dosymbol{Rel}{twoheadrightarrow}{amssymb}
+\dosymbol{Rel}{upharpoonleft}{amssymb}
+\dosymbol{Rel}{upharpoonright}{amssymb}
+\dosymbol{Rel}{upuparrows}{amssymb}
+\end{symlist}
+\begin{notes}
+  \synonyms \alias{gets}, \alias{to}, \alias{restriction}
+\end{notes}
+
+\subsection{关系符号:杂项\nopunct}
+\begin{symlist}[adjustheight=10pt]
+\dosymbol{Rel}{backepsilon}{amssymb}
+\dosymbol{Rel}{because}{amssymb}
+\dosymbol{Rel}{between}{amssymb}
+\dosymbol{Rel}{blacktriangleleft}{amssymb}
+\dosymbol{Rel}{blacktriangleright}{amssymb}
+\dosymbol{Rel}{bowtie}{kernel}
+\dosymbol{Rel}{dashv}{kernel}
+\dosymbol{Rel}{frown}{kernel}
+\dosymbol{Rel}{in}{kernel}
+\dosymbol{Rel}{mid}{kernel}
+\dosymbol{Rel}{models}{kernel}
+\dosymbol{Rel}{ni}{kernel}
+\dosymbol{Rel}{nmid}{amssymb}
+\dosymbol{Rel}{notin}{kernel}
+\dosymbol{Rel}{nparallel}{amssymb}
+\dosymbol{Rel}{nshortmid}{amssymb}
+\dosymbol{Rel}{nshortparallel}{amssymb}
+\dosymbol{Rel}{nsubseteq}{amssymb}
+\dosymbol{Rel}{nsubseteqq}{amssymb}
+\dosymbol{Rel}{nsupseteq}{amssymb}
+\dosymbol{Rel}{nsupseteqq}{amssymb}
+\dosymbol{Rel}{ntriangleleft}{amssymb}
+\dosymbol{Rel}{ntrianglelefteq}{amssymb}
+\dosymbol{Rel}{ntriangleright}{amssymb}
+\dosymbol{Rel}{ntrianglerighteq}{amssymb}
+\dosymbol{Rel}{nvdash}{amssymb}
+\dosymbol{Rel}{nVdash}{amssymb}
+\dosymbol{Rel}{nvDash}{amssymb}
+\dosymbol{Rel}{nVDash}{amssymb}
+\dosymbol{Rel}{parallel}{kernel}
+\dosymbol{Rel}{perp}{kernel}
+\dosymbol{Rel}{pitchfork}{amssymb}
+\dosymbol{Rel}{propto}{kernel}
+\dosymbol{Rel}{shortmid}{amssymb}
+\dosymbol{Rel}{shortparallel}{amssymb}
+\dosymbol{Rel}{smallfrown}{amssymb}
+\dosymbol{Rel}{smallsmile}{amssymb}
+\dosymbol{Rel}{smile}{kernel}
+\dosymbol{Rel}{sqsubset}{amssymb}
+\dosymbol{Rel}{sqsubseteq}{kernel}
+\dosymbol{Rel}{sqsupset}{amssymb}
+\dosymbol{Rel}{sqsupseteq}{kernel}
+\dosymbol{Rel}{subset}{kernel}
+\dosymbol{Rel}{Subset}{amssymb}
+\dosymbol{Rel}{subseteq}{kernel}
+\dosymbol{Rel}{subseteqq}{amssymb}
+\dosymbol{Rel}{subsetneq}{amssymb}
+\dosymbol{Rel}{subsetneqq}{amssymb}
+\dosymbol{Rel}{supset}{kernel}
+\dosymbol{Rel}{Supset}{amssymb}
+\dosymbol{Rel}{supseteq}{kernel}
+\dosymbol{Rel}{supseteqq}{amssymb}
+\dosymbol{Rel}{supsetneq}{amssymb}
+\dosymbol{Rel}{supsetneqq}{amssymb}
+\dosymbol{Rel}{therefore}{amssymb}
+\dosymbol{Rel}{trianglelefteq}{amssymb}
+\dosymbol{Rel}{trianglerighteq}{amssymb}
+\dosymbol{Rel}{varpropto}{amssymb}
+\dosymbol{Rel}{varsubsetneq}{amssymb}
+\dosymbol{Rel}{varsubsetneqq}{amssymb}
+\dosymbol{Rel}{varsupsetneq}{amssymb}
+\dosymbol{Rel}{varsupsetneqq}{amssymb}
+\dosymbol{Rel}{vartriangle}{amssymb}
+\dosymbol{Rel}{vartriangleleft}{amssymb}
+\dosymbol{Rel}{vartriangleright}{amssymb}
+\dosymbol{Rel}{vdash}{kernel}
+\dosymbol{Rel}{Vdash}{amssymb}
+\dosymbol{Rel}{vDash}{amssymb}
+\dosymbol{Rel}{Vvdash}{amssymb}
+\end{symlist}
+\begin{notes}
+  \synonyms \alias{owns}
+\end{notes}
+
+\subsection{累积运算符\nopunct}
+\begin{symlist}[adjustcols=-1]
+\openup3pt
+\dosymbol{COi}{int}{kernel}
+\dosymbol{COi}{oint}{kernel}
+\dosymbol{COs}{bigcap}{kernel}
+\dosymbol{COs}{bigcup}{kernel}
+\dosymbol{COs}{bigodot}{kernel}
+\dosymbol{COs}{bigoplus}{kernel}
+\dosymbol{COs}{bigotimes}{kernel}
+\dosymbol{COs}{bigsqcup}{kernel}
+\dosymbol{COs}{biguplus}{kernel}
+\dosymbol{COs}{bigvee}{kernel}
+\dosymbol{COs}{bigwedge}{kernel}
+\dosymbol{COs}{coprod}{kernel}
+\dosymbol{COs}{prod}{kernel}
+\dosymbol{COs}{smallint}{kernel}
+\dosymbol{COs}{sum}{kernel}
+\end{symlist}
+
+\subsection{标点符号\nopunct}
+\begin{symlist}[adjustcols=-4]
+\openup2pt
+\dosymbol{Ordc}{.}{kernel}
+\dosymbol{Ordc}{/}{kernel}
+\dosymbol{Ordc}{|}{kernel}
+\dosymbol{Punc}{,}{kernel}
+\dosymbol{Punc}{;}{kernel}
+\dosymbol{Pun}{colon}{kernel}
+\dosymbol{Relc}{:}{kernel}
+%\dosymbol{DeR}{!}{kernel}
+%\dosymbol{DeR}{?}{kernel}
+\dosymbol{Punc}{!}{kernel}
+\dosymbol{Punc}{?}{kernel}
+\dosymbol{Inn}{dotsb}{kernel}
+\dosymbol{Inn}{dotsc}{kernel}
+\dosymbol{Inn}{dotsi}{kernel}
+\dosymbol{Inn}{dotsm}{kernel}
+\dosymbol{Inn}{dotso}{kernel}
+\dosymbol{Inn}{ddots}{kernel}
+\dosymbol{Ord}{vdots}{kernel}
+\end{symlist}
+\begin{notes}
+\item The \verb':' by itself produces a colon with
+  class-3 (relation) spacing. The command \cn{colon} produces special
+  spacing for use in constructions such as \verb'f\colon A\to B'
+  $f\colon A\to B$.
+\item Although the commands \cn{cdots} and \cn{ldots} are frequently
+  used, we recommend the more semantically oriented commands
+  \cn{dotsb} \cn{dotsc} \cn{dotsi} \cn{dotsm} \cn{dotso} for most
+  purposes\dotsref.
+\end{notes}
+
+\subsection{配对分隔符}\label{pair-delims}
+有关更多信息，请参见~\ref{delim}一节。
+\begin{symlist}
+\openup7pt
+\dosymbol{DeLRc}{(}{)}{kernel}
+\dosymbol{DeLRc}{[}{]}{kernel}
+\dosymbol{DeLR}{lbrace}{rbrace}{kernel}
+\dosymbol{DeLR}{lvert}{rvert}{kernel}
+\dosymbol{DeLR}{lVert}{rVert}{kernel}
+\dosymbol{DeLR}{langle}{rangle}{kernel}
+\dosymbol{DeLR}{lceil}{rceil}{kernel}
+\dosymbol{DeLR}{lfloor}{rfloor}{kernel}
+\dosymbol{DeLR}{lgroup}{rgroup}{kernel}
+\dosymbol{DeLR}{lmoustache}{rmoustache}{kernel}
+\end{symlist}
+
+\subsection{非配对分隔符\nopunct}
+\begin{symlist}
+\dosymbol{DeB}{vert}{kernel}
+\dosymbol{DeB}{Vert}{kernel}
+\dosymbol{DeBc}{/}{kernel}
+\dosymbol{DeB}{backslash}{kernel}
+\dosymbol{DeB}{arrowvert}{kernel}
+\dosymbol{DeB}{Arrowvert}{kernel}
+\dosymbol{DeB}{bracevert}{kernel}
+\end{symlist}
+\begin{notes}
+\item Using \cn{vert}, \verb'|', \cn{Vert}, or \cn{|} for paired
+delimiters is not recommended\vertref.  Instead, use delimiters from
+the list in Section~\ref{pair-delims}.
+  \synonyms \alias{|}
+\end{notes}
+
+\subsection{可扩展的垂直箭头\nopunct}
+\begin{symlist}
+\dosymbol{DeA}{uparrow}{kernel}
+\dosymbol{DeA}{Uparrow}{kernel}
+\dosymbol{DeA}{downarrow}{kernel}
+\dosymbol{DeA}{Downarrow}{kernel}
+\dosymbol{DeA}{updownarrow}{kernel}
+\dosymbol{DeA}{Updownarrow}{kernel}
+\end{symlist}
+
+\subsection{数学重音\nopunct}\label{accents}
+\begin{symlist}[adjustcols=1]
+\dosymbol{Acc}{acute}{kernel}
+\dosymbol{Acc}{grave}{kernel}
+\dosymbol{Acc}{ddot}{kernel}
+\dosymbol{Acc}{tilde}{kernel}
+\dosymbol{Acc}{bar}{kernel}
+\dosymbol{Acc}{breve}{kernel}
+\dosymbol{Acc}{check}{kernel}
+\dosymbol{Acc}{hat}{kernel}
+\dosymbol{Acc}{vec}{kernel}
+\dosymbol{Acc}{dot}{kernel}
+\dosymbol{Acc}{ddot}{amsmath}
+\dosymbol{Acc}{dddot}{amsmath}
+\dosymbol{Acc}{mathring}{amsmath}
+\dosymbol{Accw}{widetilde}{kernel}
+\dosymbol{Accw}{widehat}{kernel}
+\end{symlist}
+
+\subsection{命名操作符}
+这些操作符由一个多字母缩写表示。
+\shiftlistright40pt
+\begin{symlist}[adjustcols=-1]
+\dosymbol{Opn}{arccos}{kernel}
+\dosymbol{Opn}{arcsin}{kernel}
+\dosymbol{Opn}{arctan}{kernel}
+\dosymbol{Opn}{arg}{kernel}
+\dosymbol{Opn}{cos}{kernel}
+\dosymbol{Opn}{cosh}{kernel}
+\dosymbol{Opn}{cot}{kernel}
+\dosymbol{Opn}{coth}{kernel}
+\dosymbol{Opn}{csc}{kernel}
+\dosymbol{Opn}{deg}{kernel}
+\dosymbol{Opn}{det}{kernel}
+\dosymbol{Opn}{dim}{kernel}
+\dosymbol{Opn}{exp}{kernel}
+\dosymbol{Opn}{gcd}{kernel}
+\dosymbol{Opn}{hom}{kernel}
+\dosymbol{Opn}{inf}{kernel}
+\dosymbol{Opn}{injlim}{kernel}
+\dosymbol{Opn}{ker}{kernel}
+\dosymbol{Opn}{lg}{kernel}
+\dosymbol{Opn}{lim}{kernel}
+\dosymbol{Opn}{liminf}{kernel}
+\dosymbol{Opn}{limsup}{kernel}
+\dosymbol{Opn}{ln}{kernel}
+\dosymbol{Opn}{log}{kernel}
+\dosymbol{Opn}{max}{kernel}
+\dosymbol{Opn}{min}{kernel}
+\dosymbol{Opn}{Pr}{kernel}
+\dosymbol{Opn}{projlim}{kernel}
+\dosymbol{Opn}{sec}{kernel}
+\dosymbol{Opn}{sin}{kernel}
+\dosymbol{Opn}{sinh}{kernel}
+\dosymbol{Opn}{sup}{kernel}
+\dosymbol{Opn}{tan}{kernel}
+\dosymbol{Opn}{tanh}{kernel}
+\dosymbol{Opn}{varinjlim}{kernel}
+\dosymbol{Opn}{varprojlim}{kernel}
+\dosymbol{Opn}{varliminf}{kernel}
+\dosymbol{Opn}{varlimsup}{kernel}
+  \end{symlist}
+使用\cn{DeclareMathOperator}命令定义上述列表之外的其他命名操作符;例如在
+\begin{verbatim}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\esssup}{ess\,sup}
+\end{verbatim}
+
+可以写成
+\begin{center}
+\begin{tabular}{rl}
+\verb'\rank(x)'& $\rank(x)$\\
+\verb'\esssup(y,z)'& $\esssup(y,z)$
+\end{tabular}
+\end{center}
+
+这星形形式\cn{DeclareMathOperator*}创建一个在行间公式中显示限制的操作符，例如$\sup$或$\max$。
+
+当预先定义这样的命名运算符有问题时(例如在标题或文章摘要中使用某个运算符时)，可以直接使用另一种形式:
+
+\[\verb'\operatorname{rank}(x)'\quad
+  \rightarrow\quad\operatorname{rank}(x)\]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{符号}
+\label{notations}
+
+\subsection{顶部和底部装饰}
+它们看上去都类似于重音，但通常跨多个符号而不是应用于单个基本符号。为了便于参考，\cn{widetilde}和\cn{widehat}应用下面数学重音表中。
+
+\begin{symlist}
+\dosymbol{Accw}{widetilde}{kernel}
+\dosymbol{Accw}{widehat}{kernel}
+\dosymbol{Accw}{overline}{kernel}
+\dosymbol{Accw}{underline}{kernel}
+\dosymbol{Accw}{overbrace}{kernel}
+\dosymbol{Accw}{underbrace}{kernel}
+\dosymbol{Accw}{overleftarrow}{kernel}
+\dosymbol{Accw}{underleftarrow}{amsmath}
+\dosymbol{Accw}{overrightarrow}{kernel}
+\dosymbol{Accw}{underrightarrow}{amsmath}
+\dosymbol{Accw}{overleftrightarrow}{amsmath}
+\dosymbol{Accw}{underleftrightarrow}{amsmath}
+\end{symlist}
+
+\subsection{可扩展箭头}
+\cn{xleftarrow}和\cn{xright tarrow}生成箭头，自动扩展以适应异常宽的下标或上标。这些命令使用一个可选参数(下标)和一个强制参数(上标，可能是空的):
+
+\begin{equation}
+A\xleftarrow{n+\mu-1}B \xrightarrow[T]{n\pm i-1}C
+\end{equation}
+\begin{verbatim}
+  \xleftarrow{n+\mu-1}\quad \xrightarrow[T]{n\pm i-1}
+\end{verbatim}
+
+\subsection{符号粘贴}
+除了标准的重音符号(Section~\ref{accents})，其他符号也可以用\cn{overset}和\cn{underset}命令放在基本符号的上面或下面。例如，写 \verb|\overset{*}{X}| 会在$X$上面放一个超文本大小的 $*$，因此为 $\overset{*}{X}$。参考\ secret {sideset}中对\cn{sideset}的描述。
+
+
+\subsection{矩阵}\label{ss:matrix}
+
+该环境\env{pmatrix}、\env{bmatrix}、\env{bmatrix}、\env{vmatrix}、\env{vmatrix}和\env{vmatrix}有(分别) $(\,)$, $[\,]$,
+$\lbrace\,\rbrace$, $\lvert\,\rvert$, 和 $\lVert\,\rVert$分隔符。还有一个没有分隔符的\env{matrix}环境和一个\env{array}环境，可以用来得到规范列中的左对齐或其他变化。
+
+\begin{center}
+\begin{minipage}{.4\columnwidth}
+\begin{verbatim}
+\begin{pmatrix}
+\alpha& \beta^{*}\\
+\gamma^{*}& \delta
+\end{pmatrix}
+\end{verbatim}
+\end{minipage}
+\qquad
+\begin{minipage}{.4\columnwidth}
+\[
+\begin{pmatrix}
+\alpha& \beta^{*}\\
+\gamma^{*}& \delta
+\end{pmatrix}
+\]
+\end{minipage}
+\end{center}
+为了生成一个适合在文本中使用的小矩阵，需要一个\env{smallmatrix}环境(例如,
+\begin{math}
+\bigl( \begin{smallmatrix}
+  a&b\\ c&d
+\end{smallmatrix} \bigr)
+\end{math})
+这比普通矩阵更接近于在单个文本行中进行匹配，这个例子是由
+\begin{verbatim}
+\bigl( \begin{smallmatrix}
+  a&b\\ c&d
+\end{smallmatrix} \bigr)
+\end{verbatim}
+
+默认情况下，矩阵中的所有元素都是水平居中的。\pkg{mathtools}包提供了所有矩阵环境的星号版本以方便其他对齐，该包还提供了带星号和非星号名称的\env{smallmatrix}的命令作用。
+
+在矩阵给定的列数，使用\cn{hdotsfor}。例如，在四列矩阵的第二列中\verb'\hdotsfor{3}'将在最后三列中打印一行圆点。
+
+分段函数定义有一个\env{case}环境:
+
+\begin{verbatim}
+P_{r-j}=\begin{cases}
+    0&  \text{if $r-j$ is odd},\\
+    r!\,(-1)^{(r-j)/2}&  \text{if $r-j$ is even}.
+  \end{cases}
+\end{verbatim}
+注意 \cn{text}和嵌入数学的使用。
+
+\begin{notes}
+  \singlenote 简单的 \TeX{} 形式 \verb'\matrix{...\cr...\cr}' 应当避免使用相关
+   \cn{pmatrix} 与\cn{cases} 
+  等\LaTeX{}命令 (当加载 \pkg{amsmath} 宏包式，它们是被禁用 ).
+\end{notes}
+
+\subsection{数学间距命令}
+
+当使用\pkg{amsmath}包时，可以在数学模式中使用或之外使用所有这些数学间距命令。
+\begin{center}\begin{tabular}{llllll}
+简写 & 详细说明 & 例子 & 简写.& 详细说明 & 例子\\
+\hline
+\strut & no space& \spx{}& & no space& \spx{}\\
+\cn{\,}& \cn{thinspace}& \spx{\,}&
+  \cn{!}& \cn{negthinspace}& \spx{\!}\\
+\cn{\:}& \cn{medspace}& \spx{\:}&
+  & \cn{negmedspace}& \spx{\negmedspace}\\
+\cn{\;}& \cn{thickspace}& \spx{\;}&
+  & \cn{negthickspace}& \spx{\negthickspace}\\
+& \cn{quad}& \spx{\quad}\\
+& \cn{qquad}& \spx{\qquad}
+\end{tabular}\end{center}
+
+为了更好地控制数学间距, 可使用\cn{mspace}
+and `math units'. 一个数学单元, 或 \verb|mu|, 等于 1/18 em. 因此得到负半\cn{quad} 可写成 \verb|\mspace{-9.0mu}|.
+
+这里也有三个命令，留下的空间等于一个给定的 \lat/片段的高度与宽度。
+\begin{center}\begin{tabular}{ll}
+\colhead{Example}& \colhead{Result}\\
+\hline
+\verb'\phantom{XXX}'& space as wide and high as three X's\strut \\
+\verb'\hphantom{XXX}'& space as wide as three X's; height 0\\
+\verb'\vphantom{X}'& space of width 0, height = height of X
+\end{tabular}\end{center}
+
+\subsection{点}\label{dots}
+
+
+在各种情况下，对于省略号的首选位置(凸点或连线点)没有普遍的共识。因此，这可能被认为是品味的问题。在大多数情况下, \cn{dots} 是通用的和 \pkg{amsmath} 将按照AMS喜欢的方式解释它,即逗号之间的低点(\cn{ldots})或二进制运算符和关系之间的高点(\cn{cdots})等，但是通过使用面向语义的命令。
+\begin{itemize}
+\setlength{\itemsep}{0pt}
+\item \cn{dotsc} for \qq{逗号点}
+\item \cn{dotsb} for \qq{带有二进制操作符/关系的点}
+\item \cn{dotsm} for \qq{乘法点}
+\item \cn{dotsi} for \qq{积分点}
+\item \cn{dotso} for \qq{其它点} (以上皆非)
+\end{itemize}
+你使文档尽可能动态地适应不同的约定而不是只使用\cn{ldots}和\cn{cdots}，以防(例如)你不得不将其提交给坚持遵循这方面传统的出版商，对各种类型的默认处理遵循美国数学协会的惯例:
+\begin{center}
+\vspace{-\topsep}
+\begin{tabular}{@{}ll@{}}
+\begin{minipage}[t]{.50\textwidth}
+\small
+\begin{verbatim}
+我们就有 级数 $A_1,A_2,\dotsc$,
+部分和 $A_1+A_2+\dotsb$,
+正交积 $A_1A_2\dotsm$,
+和无穷积分
+\[\int_{A_1}\int_{A_2}\dotsi\].
+\end{verbatim}
+\end{minipage}
+&
+\begin{minipage}[t]{.48\textwidth}
+\noindent
+我们就有 级数 $A_1,A_2,\dotsc$,
+部分和 $A_1+A_2+\dotsb$,
+正交积 $A_1A_2\dotsm$,
+和无穷积分
+\[\int_{A_1}\int_{A_2}\dotsi\].
+\end{minipage}
+\end{tabular}
+\end{center}
+
+\subsection{不打断的破折号}
+
+命令\cn{nobreakdash}禁止在以下连字符或破折号之后使用换行符。例如，如果你将`pages 1\ndash 9' 写成 \verb|pages 1\nobreakdash--9| ，那么破折号和9之间永远不会出现换行符。您还可以使用\cn{nobreakdash}来防止像\verb|$p$-adic|这样的组合中出现不需要的连字符。为了经常使用，建议使用缩写，例如,
+\begin{verbatim}
+\newcommand{\p}{$p$\nobreakdash}% for "\p adic" ("p-adic")
+\newcommand{\Ndash}{\nobreakdash\textendash}% for "pages 1\Ndash 9"
+%    For "\n dimensional" ("n-dimensional"):
+\newcommand{\n}{$n$\nobreakdash-\hspace{0pt}}
+\end{verbatim}
+最后一个例子展示了如何禁止连字符后的换行符，但允许在下面的单词中使用正常的连字符。(在连字符后面加一个零宽度的空格。)
+
+\subsection{根}
+命令\cn{sqrt}生成一个平方根。要指定显式基数，请将其作为可选参数。
+\[
+\verb'\sqrt{\frac{n}{n-1} S}'\quad\sqrt{\frac{n}{n-1} S}, \qquad
+\verb'\sqrt[3]{2}'\quad
+\sqrt[3]{2}
+\]
+
+\subsection{盒装公式}
+
+命令\cn{boxed}在它的参数周围放一个框，就像\cn{fbox}一样，只是内容是在数学模式下:
+\begin{equation}
+\boxed{\eta \leq C(\delta(\eta) +\Lambda_M(0,\delta))}
+\end{equation}
+\begin{verbatim}
+  \boxed{\eta \leq C(\delta(\eta) +\Lambda_M(0,\delta))}
+\end{verbatim}
+如果你需要框住一个方程，包括方程编号，这可能是困难的，这取决于上下文;AMS作者常见问题解答中有一些建议;查看页面上用红色标出的条目
+\url{https://www.ams.org/faq?faq_id=290}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{分数及相关结构}
+
+\subsection{\hycn{frac}, \hycn{dfrac},与
+  \hycn{tfrac} 命令}
+
+\cn{frac}命令\index{fraction}接受两个参数\mdash 分子和分母\mdash，并将它们以正分数的形式排版。使用\cn{dfrac}或\cn{tfrac}来否决\LaTeX{}对分数内容的正确大小的猜测(t = text style, d =display style).
+\begin{equation}
+\frac{1}{k}\log_2 c(f),\quad\dfrac{1}{k}\log_2 c(f),\quad\tfrac{1}{k}\log_2 c(f)
+\end{equation}
+\begin{verbatim}
+\begin{equation}
+\frac{1}{k}\log_2 c(f),\quad\dfrac{1}{k}\log_2 c(f),
+    \quad\tfrac{1}{k}\log_2 c(f)
+\end{equation}
+\end{verbatim}
+\begin{equation}
+\Re{z} =\frac{n\pi \dfrac{\theta +\psi}{2}}{
+        \left(\dfrac{\theta +\psi}{2}\right)^2 + \left( \dfrac{1}{2}
+        \log \left\lvert\dfrac{B}{A}\right\rvert\right)^2}.
+\end{equation}
+\begin{verbatim}
+\begin{equation}
+\Re{z} =\frac{n\pi \dfrac{\theta +\psi}{2}}{
+        \left(\dfrac{\theta +\psi}{2}\right)^2 + \left( \dfrac{1}{2}
+        \log \left\lvert\dfrac{B}{A}\right\rvert\right)^2}.
+\end{equation}
+\end{verbatim}
+
+\subsection{\hycn{binom}, \hycn{dbinom}，和
+        \hycn{tbinom} 命令}
+
+对于像$\binom{n}{k}$这样的二项式表达式，有\cn{binom}、\cn{dbinom}和\cn{tbinom}命令:
+\begin{equation}
+2^k-\binom{k}{1}2^{k-1}+\binom{k}{2}2^{k-2}
+\end{equation}
+\begin{verbatim}
+2^k-\binom{k}{1}2^{k-1}+\binom{k}{2}2^{k-2}
+\end{verbatim}
+
+\subsection{\hycn{genfrac} 命令}
+
+\cn{frac}、\cn{binom}及其变体的功能由一个带六个参数的通用分数命令\cn{genfrac}包含。后两者对应于\cn{frac}的分子和分母;前两个是可选的分隔符(如\cn{binom}中所示);第三个是行厚度覆盖(\cn{binom}使用它将分数行厚度设置为0 pt\mdash，看不见的);第四个参数是mathstyle覆盖:整数值0\ndash 3 select，分别是\cn{displaystyle}、\cn{textstyle}、\cn{scriptstyle}和\cn{scriptscriptstyle}。如果第三个参数为空，则行厚度默认为'' normal'。
+\begin{cmdspec}[25em]
+\string\genfrac \ma{left-delim} \ma{right-delim} \ma{thickness}
+\ma{mathstyle} \ma{numerator} \ma{denominator}
+\end{cmdspec}
+为了说明这一点，下面介绍如何定义\cn{frac}、\cn{tfrac}和\cn{binom}。
+\begin{verbatim}
+\newcommand{\frac}[2]{\genfrac{}{}{}{}{#1}{#2}}
+\newcommand{\tfrac}[2]{\genfrac{}{}{}{1}{#1}{#2}}
+\newcommand{\binom}[2]{\genfrac{(}{)}{0pt}{}{#1}{#2}}
+\end{verbatim}
+
+\begin{notes}
+  \singlenote 出于技术原因，不建议在\LaTeX{}文档中使用原始分数命令\cn{over}、\cn{top}、\cn{above}(例如 \url{https://www.ams.org/faq?faq\_id=288},
+  用红色标出的条目).
+\end{notes}
+
+\subsection{连分数}
+
+连分数\index{continued fractions}
+\begin{equation}
+\cfrac{1}{\sqrt{2}+
+ \cfrac{1}{\sqrt{2}+
+  \cfrac{1}{\sqrt{2}+\cdots
+}}}
+\end{equation}
+可以通过编写得到
+{\samepage
+\begin{verbatim}
+\cfrac{1}{\sqrt{2}+
+ \cfrac{1}{\sqrt{2}+
+  \cfrac{1}{\sqrt{2}+\dotsb
+}}}
+\end{verbatim}
+}% End of \samepage
+这比直接使用\cn{frac}产生更好的效果。任何一个分子的左或右放置都是通过使用\cn{cfrac}\verb|[l]| 或 \cn{cfrac}\verb|[r]|而不是\cn{cfrac}来完成的。
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{分隔符}\label{delim}
+
+\subsection{分隔符大小}\label{bigdel}
+
+除非另有说明，否则数学公式中的分隔符将保持标准大小，而不考虑所包含材料的高度。要获得更大的尺寸，你可以使用 \cn{big...}前缀(见下面)，或者你可以使用\cn{left}和\cn{right}前缀来自动调整大小。
+
+\cn{left}和\cn{right}执行的自动分隔符大小有两个限制：首先它被机械地应用于生成足够大的分隔符，以包含所包含的最大项；其次大小的范围具有相当大的量子跳跃，这意味着对于给定的分隔符大小来说，如果表达式非常非常大，则会得到下一个更大的大小，在正常大小的文本中跳转约6pt(顶部和底部为3pt)。分隔符大小通常在两种或三种情况下进行调整。这些调整是
+使用以下命令完成:
+\begin{center}\begin{tabular}{l|llllll}
+分隔符&
+  no size& \ncn{left}& \ncn{bigl}& \ncn{Bigl}& \ncn{biggl}& \ncn{Biggl}\\
+大小&
+  specified& \ncn{right}& \ncn{bigr}& \ncn{Bigr}& \ncn{biggr}& \ncn{Biggr}\\[4pt]
+%\hline\omit\rule{0pt}{1ex}\\
+\hline\omit\rule{0pt}{1ex}\\[-1ex]
+结果 $\vphantom{\Bigg|^{\frac{1}{2}}}$ & % force height to avoid gap in vertical
+  $\displaystyle(b)(\frac{c}{d})$&
+  $\displaystyle\left(b\right)\left(\frac{c}{d}\right)$&
+  $\displaystyle\bigl(b\bigr)\bigl(\frac{c}{d}\bigr)$&
+  $\displaystyle\Bigl(b\Bigr)\Bigl(\frac{c}{d}\Bigr)$&
+  $\displaystyle\biggl(b\biggr)\biggl(\frac{c}{d}\biggr)$&
+  $\displaystyle\Biggl(b\Biggr)\Biggl(\frac{c}{d}\Biggr)$
+\end{tabular}\end{center}
+第一种调整是对带极限的累加运算符进行的，比如求和符号。使用\cn{left}和\cn{right}分隔符通常会比需要的大，而使用\verb|Big| 或 \verb|bigg|大小\index{big@\cn{big}, \cn{Big}, \cn{bigg}, \dots\ delimiters} 会得到更好的结果:
+\begin{equation*}
+\left[\sum_i a_i\left\lvert\sum_j x_{ij}\right\rvert^p\right]^{1/p}
+\quad\text{versus}\quad
+\biggl[\sum_i a_i\Bigl\lvert\sum_j x_{ij}\Bigr\rvert^p\biggr]^{1/p}
+\end{equation*}
+\begin{verbatim}
+\biggl[\sum_i a_i\Bigl\lvert\sum_j x_{ij}\Bigr\rvert^p\biggr]^{1/p}
+\end{verbatim}
+第二种情况是聚集的分隔符对，其中\cn{left}和\cn{right}使它们的大小相同(因为这足以覆盖所包含的内容)，但是你真正想要的是使一些分隔符稍微大一些，以便更容易看到嵌套。
+\begin{equation*}
+\left((a_1 b_1) - (a_2 b_2)\right)
+\left((a_2 b_1) + (a_1 b_2)\right)
+\quad\text{versus}\quad
+\bigl((a_1 b_1) - (a_2 b_2)\bigr)
+\bigl((a_2 b_1) + (a_1 b_2)\bigr)
+\end{equation*}
+\begin{verbatim}
+\left((a_1 b_1) - (a_2 b_2)\right)
+\left((a_2 b_1) + (a_1 b_2)\right)
+\quad\text{versus}\quad
+\bigl((a_1 b_1) - (a_2 b_2)\bigr)
+\bigl((a_2 b_1) + (a_1 b_2)\bigr)
+\end{verbatim}
+第三种情况是在运行文本时对象的大小稍大，比如$\left\lvert\frac{b'}{d'}\right\rvert$，其中\cn{left}和\cn{right}产生的分隔符会导致过多的行扩展。在这种情况下，可以使用 \ncn{bigl} 和 \ncn{bigr}\index{big@\cn{big}, \cn{Big}, \cn{bigg}, \dots\ delimiters}来生成比基本大小大但仍然能够适应正常行间距的分隔符:
+$\bigl\lvert\frac{b'}{d'}\bigr\rvert$.
+
+\pkg{mathtools}包提供了一个可以简化大小设置的功能\cn{DeclarePairedDelimiter};有关详细信息，请参阅包文档。
+
+\subsection{竖条符号}\label{verts}
+不建议使用\verb'|'字符来生成成对的分隔符。符号的方向性存在歧义，在极少数情况下会产生不正确的空格，例如，\verb'|k|=|-k|'”生成$|k|=|-k|$，而\verb'|\sin x|' ”生成$ |0 \sin x |1 $，而不是正确的$\lvert\sin x\rvert$。将cn{lvert}用于\qq{left vert bar}和\cn{rvert}用于\qq{right vert bar}，只要它们成对使用，就可以防止这个问题;比较由\verb'\lvert -k\rvert'生成的$\lvert -k\rvert$。对于双杠，有类似的\cn{lVert}、\cn{rVert}命令。推荐的做法是在文档序言中为使用垂直条符号的任何配对分隔符定义适当的命令:
+\begin{verbatim}
+\providecommand{\abs}[1]{\lvert#1\rvert}
+\providecommand{\norm}[1]{\lVert#1\rVert}
+\end{verbatim}
+于是 \verb|\abs{z}| 会产生 $\lvert z\rvert$ 和
+\verb|\norm{v}| 会生成 $\lVert v\rVert$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{\hycn{text} 命令}
+
+命令\cn{text}的主要用途是用于显示中的单词或短语\index{text} 显示中的数学片段。它的效果类似于\cn{mbox}，但是不同于\cn{mbox}，如果在下标中使用，它会自动生成订阅大小的文本。
+\begin{equation}
+f_{[x_{i-1},x_i]} \text{ is monotonic,}
+\quad i = 1,\dots,c+1
+\end{equation}
+\begin{verbatim}
+f_{[x_{i-1},x_i]} \text{ is monotonic,}
+\quad i = 1,\dots,c+1
+\end{verbatim}
+
+\subsection{与\hycn{mod}相关}
+
+命令\cn{mod}、\cn{bmod}、\cn{pmod}、\cn{pod}处理\qq{mod}符号的特殊间距约定。\cn{mod}和\cn{pod}是一些作者喜欢的\cn{pmod}的变体;\cn{mod}省略括号，而\cn{pod}省略\qq{mod}并保留
+括号。
+\begin{equation}
+\gcd(n,m\bmod n) ;\quad x\equiv y\pmod b
+;\quad x\equiv y\mod c ;\quad x\equiv y\pod d
+\end{equation}
+\begin{verbatim}
+\gcd(n,m\bmod n) ;\quad x\equiv y\pmod b
+;\quad x\equiv y\mod c ;\quad x\equiv y\pod d
+\end{verbatim}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{积分与求和}
+
+\subsection{改变限制的位置}
+
+根据惯例和上下文，对积分、求和与类似符号的限制要么放在基符号一侧，要么放在基符号上下两侧。\lat/有自动选择一个或另一个的规则，大多数时候结果是令人满意的。如果没有，有三个\lat/命令可以用来影响限制的位置:\cn{limits}、\cn{nolimits}、\cn{displaylimits}.比较
+\begin{center}
+\begin{minipage}{.4\columnwidth}
+\[\int_{\abs{x-x_z(t)}<X_0} z^6(t)\phi(x)\]
+\begin{verbatim}
+\int_{\abs{x-x_z(t)}<X_0} ...
+\end{verbatim}
+\end{minipage}\quad
+and\quad
+\begin{minipage}{.5\columnwidth}
+\[\int\limits_{\abs{x-x_z(t)}<X_0} z^6(t)\phi(x)\]
+\begin{verbatim}
+\int\limits_{\abs{x-x_z(t)}<X_0} ...
+\end{verbatim}
+\end{minipage}
+\end{center}
+\cn{limits}命令应该紧跟在它所应用的基本符号之后，意思是:将下面的下标和/或上标移到limit位置，而不考虑这个符号的通常约定。\cn{nolimits}的意思是将它们移到一边，而\cn{displaylimits}可能用于定义一种新的基符号，意思是使用\cn{sum}命令的标准定位。
+
+还请参阅\cite{amsldoc}中的选项\opt{intlimits}和\opt{nosumlimits}的描述。
+
+\subsection{多重积分}
+
+\cn{iint}、\cn{iiint}和\cn{iiiint}给出多个积分符号\index{integrals!multiple}之间的间距很好地调整，在文本和显示风格。\cn{idotsint}是同一个概念的扩展，它给出了两个带点的积分符号。注意在$dx$和\index{thin space (\protect\cn{,})}之前使用更小空间(\cn{，})\index{thin space (\protect\cn{，})}来阐明其含义。
+\begin{gather}
+\iint\limits_A f(x,y)\,dx\,dy\qquad\iiint\limits_A
+f(x,y,z)\,dx\,dy\,dz\\
+\iiiint\limits_A
+f(w,x,y,z)\,dw\,dx\,dy\,dz\qquad\idotsint\limits_A f(x_1,\dots,x_k)
+\end{gather}
+\begin{verbatim}
+\iint\limits_A f(x,y)\,dx\,dy\qquad\iiint\limits_A
+f(x,y,z)\,dx\,dy\,dz\\
+\iiiint\limits_A
+f(w,x,y,z)\,dw\,dx\,dy\,dz\qquad\idotsint\limits_A f(x_1,\dots,x_k)
+\end{verbatim}
+
+\subsection{多行下标和上标}
+
+可以使用\cn{substack}命令生成多行下标或上标:\index{subscripts and superscripts!multiline}\relax \index{superscripts|see{subscripts and superscripts}}
+\begin{center}
+\begin{tabular}{ll}
+\begin{minipage}[t]{.6\columnwidth}
+\begin{verbatim}
+\sum_{\substack{
+         0\le i\le m\\
+         0<j<n}}
+  P(i,j)
+\end{verbatim}
+\end{minipage}
+&
+$\displaystyle
+\sum_{\substack{0\le i\le m\\ 0<j<n}} P(i,j)$
+\end{tabular}
+\end{center}
+
+\subsection{\hycn{sideset} 命令}\label{sideset}
+
+还有一个名为\cn{sideset}的命令，用于一个非常特殊的目的:将符号放在下标和上标\index{subscripts and superscripts!on sums}在符号$\sum$或$\prod$的角落上。\emph{Note: The \cn{sideset} command is only designed for use with large operator symbols; with ordinary symbols the results are unreliable.}使用\cn{sideset}，你可以编写
+\begin{center}
+\begin{tabular}{ll}
+\begin{minipage}[t]{.6\columnwidth}
+\begin{verbatim}
+\sideset{}{'}
+  \sum_{n<k,\;\text{$n$ odd}} nE_n
+\end{verbatim}
+\end{minipage}
+&$\displaystyle
+\sideset{}{'}\sum_{n<k,\;\text{$n$ odd}} nE_n
+$
+\end{tabular}
+\end{center}
+额外的一对空大括号是由\cn{sideset}能够在大型运算符的每个角上放置一个或多个符号来解释的；要在累乘符号的每个角上加上星号，你需要键入
+\begin{center}
+\begin{tabular}{ll}
+\begin{minipage}[t]{.6\columnwidth}
+\begin{verbatim}
+\sideset{_*^*}{_*^*}\prod
+\end{verbatim}
+\end{minipage}
+&$\displaystyle
+\sideset{_*^*}{_*^*}\prod
+$
+\end{tabular}
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{改变公式中元素的大小}
+
+用于更改数学公式内部字体大小的\lat/机制与数学公式外部使用的机制完全不同。如果您试图在公式中使用\cn{large}或\cn{huge}等文本命令将内容变大
+\[\text{\large \#}\qquad\verb'{\large \#}'\]
+你将收到一条报错警告消息.
+\begin{verbatim}
+命令 \large 在数学模式下无效
+\end{verbatim}
+然而这样的尝试常常表明对\lat/数学符号工作原理的误解，如果你希望在它的排版属性中有一个类似于求和符号的a\#符号，那么在原则上，实现这一点的最佳方法是使用标准\lat/ \cn{DeclareMathSymbol}命令将它定义为“mathop”类型的符号(请参阅\cite{fntguide}).(然而这需要获得具有合适文本大小\slash 显示，而事实可能并非如此简单.)
+
+考虑表达式:
+\[\frac{\sum_{n > 0} z^n}{\prod_{1\leq k\leq n} (1-q^k)}
+\qquad\begin{minipage}{.5\columnwidth}
+\begin{verbatim}
+\frac{\sum_{n > 0} z^n}
+     {\prod_{1\leq k\leq n} (1-q^k)}
+\end{verbatim}
+\end{minipage}
+\]
+在这种情况下，使用\cn{dfrac}而不是\cn{frac}不会改变任何东西;如果您希望求和累乘的数学符号显示完整的大小，你需要\cn{displaystyle}命令:
+\[
+\frac{{\displaystyle\sum_{n > 0} z^n}}
+     {{\displaystyle\prod_{1\leq k\leq n} (1-q^k)}}
+\qquad\begin{minipage}{.7\columnwidth}
+\begin{verbatim}
+\frac{{\displaystyle\sum_{n > 0} z^n}}
+     {{\displaystyle\prod_{1\leq k\leq n} (1-q^k)}}
+\end{verbatim}
+\end{minipage}
+\]
+如果你想要全尺寸的符号，但是在边上有限制，也可以使用\cn{nolimits}命令:
+\[
+\frac{{\displaystyle\sum\nolimits_{n> 0} z^n}}
+  {{\displaystyle\prod\nolimits_{1\leq k\leq n} (1-q^k)}}
+\qquad\begin{minipage}{.76\columnwidth}
+\begin{verbatim}
+\frac{{\displaystyle\sum\nolimits_{n> 0} z^n}}
+  {{\displaystyle\prod\nolimits_{1\leq k\leq n} (1-q^k)}}
+\end{verbatim}
+\end{minipage}
+\]
+类似的命令\cn{textstyle}、\cn{scriptstyle}和\cn{scriptstyle}强制\lat/使用(分别)内联数学、一阶下标或二阶下标中应用的符号大小和间距，即使当前上下文通常也会产生一些其他大小.
+
+\textbf{Note:} 这些命令属于\lat/ book中称为“声明”的一类特殊命令。特别需要注意的是分隔命令效果的大括号落在哪里:
+\begin{center}
+\textbf{Right: } \verb'{\displaystyle ...}'
+\qquad\qquad\textbf{Wrong: } \verb'\displaystyle{...}'
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{其它宏包组合}
+\label{other-packages}
+
+许多其他处理数学公式某些方面的\LaTeX{} 包可以从CTAN(全面的 \TeX{} 存档网络)获得。推荐几个例子:
+\begin{description}
+\raggedright
+\item[mathtools] \pkg{amsmath} 附加功能扩展 ; 加载\pkg{amsmath}.
+\item[amsthm] 一般定理和证明的设置；
+\item[amsfonts] 定义\cn{mathbb}和\cn{mathfrak}，并提供对许多附加符号的使用 (without names; \pkg{amssymb} provides the
+  names).
+\item[accents] 在重音符号和使用任意符号的重音符号下.
+\item[bm] Bold math包，提供了\cn{boldsymbol}使数学公式以粗体的方式
+来显示.
+\item[mathrsfs] Ralph Smith's Formal Script,花体设置.
+\item[cases] 将大括号应用于两个或多个方程，而不丢失单个方程的编号.
+\item[delarray] 跨越数组多行的分隔符.
+%%\item[kuvio] Commutative diagrams and other diagrams. % not in TeX Live
+\item[xypic] 交换图和其他图.
+\item[TikZ] 图形工具，包括各种绘制图表的功能.
+\end{description}
+
+如果你知道这个宏包的名称，\TeX{} 目录是一个快速查找的捷径.
+\null\hspace{3\parindent}
+\url{http://mirror.ctan.org/help/Catalogue/alpha.html},\\
+\medskip
+有关\TeX 问题与解答的论坛 \\
+\null\hspace{2\parindent}
+\url{https://tex.stackexchange.com/questions}\\
+检索归类后已有解答;按关键词主题进行搜索\\
+\null\hspace{2\parindent}
+\url{https://tex.meta.stackexchange.com/a/2425#2425}\\
+如果没有什么有用的东西出现，那就自我解答.
+
+%\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{thebibliography}{AMUG}
+\raggedright
+
+\bibitem[AMUG]{amsldoc} American Mathematical Society and the \LaTeX3 Project:
+  \emph{User's Guide for the \textnormal{\ttfamily amsmath} package},
+  Version~2.$+$,
+  \url{http://mirror.ctan.org/macros/latex/required/amsmath/amsldoc.tex} and
+  \url{http://mirror.ctan.org/macros/latex/required/amsmath/amsldoc.pdf},
+  2017.
+
+\bibitem[AFUG]{amsfndoc} American Mathematical Society:
+  \emph{User's Guide, AMSFonts}, 
+  \url{http://mirror.ctan.org/fonts/amsfonts/amsfndoc.pdf}, 2002.
+
+\bibitem[CLSL]{comprehensive} Scott Pakin:
+  \emph{The Comprehensive \LaTeX{} Symbol List},
+  \url{http://mirror.ctan.org/tex-archive/info/symbols/comprehensive/},
+  January 2017.  Raw font tables, without symbol names, are shown
+  alphabetically by font name in the \fn{rawtables*.pdf} files in the
+  same area of CTAN and from \TeX\,Live with \texttt{texdoc rawtables}.
+
+\bibitem[Lam]{lamport} Leslie Lamport: \emph{\LaTeX{}: A document
+    preparation system}, 2nd edition, Addison-Wesley, 1994.
+
+\bibitem[LC]{companion} Frank Mittelbach and Michel Goossens,
+  with Johannes Braams, David Carlisle, and Chris Rowley:
+  \emph{The \LaTeX{} Companion}, 2nd edition, Addison-Wesley, 2004.
+
+\bibitem[LFG]{fntguide} \LaTeX3 Project Team: \emph{\LaTeXe{} font
+  selection}, % \fn{fntguide.tex}, November 2005.
+  \url{http://mirror.ctan.org/macros/latex/doc/fntguide.pdf}, 2005.
+
+\bibitem[LGC]{graphics-companion} Michel Goossens, Frank Mittelbach,
+  Sebastian Rahtz, Denis Roegel, and Herbert~Vo\ss:
+  \emph{The \LaTeX{} Graphics Companion}, 2nd edition, Addison-Wesley, 2008.
+
+\bibitem[LGG]{grfguide} D.~P. Carlisle, \LaTeX3 Project:
+  \emph{Packages in the `graphics' bundle}, %\fn{grfguide.tex}, 2017.
+  \url{http://mirror.ctan.org/macros/latex/required/graphics/grfguide.pdf},
+  2017.
+
+\bibitem[LUG]{usrguide} \LaTeX3 Project Team: \emph{\LaTeXe~for
+  authors}, % \fn{usrguide.tex}, 2015.
+  \url{http://mirror.ctan.org/macros/latex/doc/usrguide.pdf}, 2015.
+
+\bibitem[MML]{gratzer} George Gr\"atzer: \textit{More Math into \LaTeX},
+   5th edition, Springer, New York, 2016.
+
+\bibitem[UCM]{uc-math} Will Robertson: \emph{Every symbol
+  \textup{(}most symbols\textup{)} defined by \pkg{unicode-math}},
+  \url{http://mirror.ctan.org/macros/latex/contrib/unicode-math/unimath-symbols.pdf}, 2017; and\\
+  Will Robertson, Philipp Stephani, Joseph Wright, and Khaled Hosny:
+  \emph{Experimental Unicode mathematical typesetting: The \pkg{unicode-math}
+  package},
+  \url{http://mirror.ctan.org/macros/latex/contrib/unicode-math/unicode-math.pdf}, 2017.
+
+\end{thebibliography}
+
+\end{document}
